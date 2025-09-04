@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% block title %}Marketplace - Basix{% endblock %}
+{% block content %}
+
+</head>
+
+  <!-- MAIN -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Title + Subtitle -->
+<!-- Marketplace Title Section -->
+<section class="relative mb-16 text-center px-4">
+  <!-- Title -->
+  <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight" style="color: darkgreen;">
+    Marketplace
+  </h1>
+
+  <!-- Subtitle -->
+  <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+    Discover and invest in 
+    <span class="font-semibold text-gray-800">tokenized phigital assets</span> —  
+    a seamless blend of <span class="font-medium text-gray-700">real estate</span> 
+    and <span class="font-medium text-gray-700">digital innovation</span>.
+  </p>
+</section>
+
+
+
+<!-- FILTER BAR -->
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 md:p-4 mb-6" style="margin-top: -30px;">
+  <div class="flex flex-wrap items-center gap-3">
+    <!-- Search -->
+    <label class="flex-1 min-w-[220px]">
+      <div class="relative">
+        <input 
+          class="w-full h-11 pl-10 pr-3 rounded-lg border border-gray-300 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-300 placeholder-gray-400 text-sm"
+          type="text" 
+          placeholder="Search properties..." 
+        />
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/>
+        </svg>
+      </div>
+    </label>
+
+    <!-- Location select -->
+    <button class="h-11 px-4 rounded-lg border border-gray-300 bg-white inline-flex items-center gap-2 text-gray-700 hover:border-emerald-400 hover:bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-300">
+      <span>All Locations</span>
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+      </svg>
+    </button>
+
+    <!-- Type select -->
+    <button class="h-11 px-4 rounded-lg border border-emerald-500/60 bg-white inline-flex items-center gap-2 text-gray-800 hover:border-emerald-600 hover:border-2 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-300">
+      <span>All Types</span>
+      <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+      </svg>
+    </button>
+
+    <!-- Filter icon -->
+    <button class="h-11 w-11 rounded-lg border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm focus:outline-none focus:ring-1 focus:ring-emerald-300">
+      <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M6 12h12M9 18h6"/>
+      </svg>
+    </button>
+
+    <!-- View toggles -->
+    <div class="flex items-center gap-2">
+      <button id="gridBtn" 
+        class="h-11 w-11 rounded-lg flex items-center justify-center font-medium transition 
+               bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-300">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>
+        </svg>
+      </button>
+      
+      <button id="listBtn" 
+        class="h-11 w-11 rounded-lg flex items-center justify-center font-medium transition 
+               border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-emerald-300">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h12M4 6h.01M8 12h12M4 12h.01M8 18h12M4 18h.01"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</section>
+
+
+
+    <!-- GRID VIEW -->
+    <section id="gridView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Card 1 -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition group">
+        <div class="relative">
+          <img class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800" alt="Luxury Beachfront Villa">
+          <span class="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Available</span>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-800 group-hover:text-brand-700 transition">Luxury Beachfront Villa</h3>
+          <p class="text-sm text-gray-500">Malibu, CA</p>
+          <div class="mt-4 space-y-1 text-sm text-gray-600">
+            <p><span class="font-medium">Token ID:</span> <span class="float-right font-semibold">NFT-001</span></p>
+            <p><span class="font-medium">Current Price:</span> <span class="float-right font-semibold text-emerald-600">$2.5M</span></p>
+            <p><span class="font-medium">Valuation:</span> <span class="float-right font-semibold">$2.8M</span></p>
+          </div>
+          <div class="mt-4">
+            <span class="inline-block px-3 py-1 text-xs font-medium border rounded-full text-gray-700 border-gray-300">Residential</span>
+          </div>
+          <button class="w-full mt-6 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white py-2.5 rounded-xl font-semibold shadow-sm hover:from-emerald-800 hover:to-emerald-900 hover:shadow-md active:scale-95 transition-all">
+  View Details
+</button>
+
+          </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition group">
+        <div class="relative">
+          <img class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800" alt="Modern City Apartment">
+          <span class="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Available</span>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-800 group-hover:text-brand-700 transition">Modern City Apartment</h3>
+          <p class="text-sm text-gray-500">New York, NY</p>
+          <div class="mt-4 space-y-1 text-sm text-gray-600">
+            <p><span class="font-medium">Token ID:</span> <span class="float-right font-semibold">NFT-002</span></p>
+            <p><span class="font-medium">Current Price:</span> <span class="float-right font-semibold text-emerald-600">$1.2M</span></p>
+            <p><span class="font-medium">Valuation:</span> <span class="float-right font-semibold">$1.4M</span></p>
+          </div>
+          <div class="mt-4">
+            <span class="inline-block px-3 py-1 text-xs font-medium border rounded-full text-gray-700 border-gray-300">Apartment</span>
+          </div>
+          <button class="w-full mt-6 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white py-2.5 rounded-xl font-semibold shadow-sm hover:from-emerald-800 hover:to-emerald-900 hover:shadow-md active:scale-95 transition-all">
+  View Details
+</button>
+</div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition group">
+        <div class="relative">
+          <img class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800" alt="Rustic Mountain Cabin">
+          <span class="absolute top-3 right-3 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Sold</span>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-800 group-hover:text-brand-700 transition">Rustic Mountain Cabin</h3>
+          <p class="text-sm text-gray-500">Aspen, CO</p>
+          <div class="mt-4 space-y-1 text-sm text-gray-600">
+            <p><span class="font-medium">Token ID:</span> <span class="float-right font-semibold">NFT-003</span></p>
+            <p><span class="font-medium">Current Price:</span> <span class="float-right font-semibold text-red-600">Sold</span></p>
+            <p><span class="font-medium">Valuation:</span> <span class="float-right font-semibold">$3.1M</span></p>
+          </div>
+          <div class="mt-4">
+            <span class="inline-block px-3 py-1 text-xs font-medium border rounded-full text-gray-700 border-gray-300">Residential</span>
+          </div>
+          <button class="w-full mt-6 bg-gray-200 text-gray-600 py-2.5 rounded-xl font-semibold shadow-sm cursor-not-allowed">Not Available</button>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+<div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition group">
+  <div class="relative">
+    <img class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" 
+         src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" 
+         alt="Beachside Bungalow">
+    <span class="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Available</span>
+  </div>
+  <div class="p-6">
+    <h3 class="text-lg font-semibold text-gray-800 group-hover:text-brand-700 transition">Beachside Bungalow</h3>
+    <p class="text-sm text-gray-500">Miami, FL</p>
+    <div class="mt-4 space-y-1 text-sm text-gray-600">
+      <p><span class="font-medium">Token ID:</span> <span class="float-right font-semibold">NFT-004</span></p>
+      <p><span class="font-medium">Current Price:</span> <span class="float-right font-semibold text-emerald-600">$900K</span></p>
+      <p><span class="font-medium">Valuation:</span> <span class="float-right font-semibold">$1.0M</span></p>
+    </div>
+    <div class="mt-4">
+      <span class="inline-block px-3 py-1 text-xs font-medium border rounded-full text-gray-700 border-gray-300">Residential</span>
+    </div>
+    <button class="w-full mt-6 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white py-2.5 rounded-xl font-semibold shadow-sm hover:from-emerald-800 hover:to-emerald-900 hover:shadow-md active:scale-95 transition-all">
+  View Details
+</button>
+</div>
+</div>
+
+      <!-- Card 5 -->
+      <div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition group">
+        <div class="relative">
+          <img class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800" alt="Modern Office Space">
+          <span class="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Available</span>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-800 group-hover:text-brand-700 transition">Modern Office Space</h3>
+          <p class="text-sm text-gray-500">San Francisco, CA</p>
+          <div class="mt-4 space-y-1 text-sm text-gray-600">
+            <p><span class="font-medium">Token ID:</span> <span class="float-right font-semibold">NFT-005</span></p>
+            <p><span class="font-medium">Current Price:</span> <span class="float-right font-semibold text-emerald-600">$3.8M</span></p>
+            <p><span class="font-medium">Valuation:</span> <span class="float-right font-semibold">$4.2M</span></p>
+          </div>
+          <div class="mt-4">
+            <span class="inline-block px-3 py-1 text-xs font-medium border rounded-full text-gray-700 border-gray-300">Commercial</span>
+          </div>
+          <button class="w-full mt-6 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white py-2.5 rounded-xl font-semibold shadow-sm hover:from-emerald-800 hover:to-emerald-900 hover:shadow-md active:scale-95 transition-all">
+  View Details
+</button>
+</div>
+      </div>
+    </section>
+
+    <!-- LIST VIEW -->
+    <section id="listView" class="hidden space-y-6">
+      <!-- List Card 1 -->
+<div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition flex flex-col md:flex-row">
+  <div class="md:w-1/3">
+    <img class="h-56 md:h-full w-full object-cover" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800" alt="">
+  </div>
+  <div class="p-6 flex-1">
+    <h3 class="text-xl font-semibold text-gray-800 hover:text-emerald-700 transition">Luxury Beachfront Villa</h3>
+    <p class="text-sm text-gray-500">Malibu, CA</p>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+      <p><span class="font-medium">Token ID:</span> NFT-001</p>
+      <p><span class="font-medium">Price:</span> <span class="text-emerald-600 font-semibold">$2.5M</span></p>
+      <p><span class="font-medium">Valuation:</span> $2.8M</p>
+      <p><span class="font-medium">Status:</span> <span class="text-emerald-600 font-semibold">Available</span></p>
+      <p><span class="font-medium">Type:</span> Residential</p>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button class="px-6 py-2.5 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-xl font-semibold hover:from-emerald-800 hover:to-emerald-900 active:scale-95 transition">View Details</button>
+      <button class="px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition">Compare</button>
+    </div>
+  </div>
+</div>
+
+
+     <!-- List Card 2 -->
+<div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition flex flex-col md:flex-row">
+  <div class="md:w-1/3">
+    <img class="h-56 md:h-full w-full object-cover" src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800" alt="">
+  </div>
+  <div class="p-6 flex-1">
+    <h3 class="text-xl font-semibold text-gray-800 hover:text-emerald-700 transition">Modern City Apartment</h3>
+    <p class="text-sm text-gray-500">New York, NY</p>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+      <p><span class="font-medium">Token ID:</span> NFT-002</p>
+      <p><span class="font-medium">Price:</span> <span class="text-emerald-600 font-semibold">$1.2M</span></p>
+      <p><span class="font-medium">Valuation:</span> $1.4M</p>
+      <p><span class="font-medium">Status:</span> <span class="text-emerald-600 font-semibold">Available</span></p>
+      <p><span class="font-medium">Type:</span> Apartment</p>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button class="px-6 py-2.5 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-xl font-semibold hover:from-emerald-800 hover:to-emerald-900 active:scale-95 transition">View Details</button>
+      <button class="px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition">Compare</button>
+    </div>
+  </div>
+</div>
+
+<!-- List Card 3 -->
+<div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition flex flex-col md:flex-row">
+  <div class="md:w-1/3">
+    <img class="h-56 md:h-full w-full object-cover" src="https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800" alt="">
+  </div>
+  <div class="p-6 flex-1">
+    <h3 class="text-xl font-semibold text-gray-800 hover:text-emerald-700 transition">Rustic Mountain Cabin</h3>
+    <p class="text-sm text-gray-500">Aspen, CO</p>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+      <p><span class="font-medium">Token ID:</span> NFT-003</p>
+      <p><span class="font-medium">Price:</span> <span class="text-red-600 font-semibold">Sold</span></p>
+      <p><span class="font-medium">Valuation:</span> $3.1M</p>
+      <p><span class="font-medium">Status:</span> <span class="text-red-600 font-semibold">Not Available</span></p>
+      <p><span class="font-medium">Type:</span> Residential</p>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button disabled class="px-6 py-2.5 bg-gray-200 text-gray-600 rounded-xl font-semibold cursor-not-allowed">Not Available</button>
+      <button class="px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-400 cursor-not-allowed">Compare</button>
+    </div>
+  </div>
+</div>
+
+<!-- List Card 4 -->
+<div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition flex flex-col md:flex-row">
+  <div class="md:w-1/3">
+    <img class="h-56 md:h-full w-full object-cover" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80" alt="Beachside Bungalow">
+  </div>
+  <div class="p-6 flex-1">
+    <h3 class="text-xl font-semibold text-gray-800 hover:text-emerald-700 transition">Beachside Bungalow</h3>
+    <p class="text-sm text-gray-500">Miami, FL</p>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+      <p><span class="font-medium">Token ID:</span> NFT-004</p>
+      <p><span class="font-medium">Price:</span> <span class="text-emerald-600 font-semibold">$900K</span></p>
+      <p><span class="font-medium">Valuation:</span> $1.0M</p>
+      <p><span class="font-medium">Status:</span> <span class="text-emerald-600 font-semibold">Available</span></p>
+      <p><span class="font-medium">Type:</span> Residential</p>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button class="px-6 py-2.5 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-xl font-semibold hover:from-emerald-800 hover:to-emerald-900 active:scale-95 transition">View Details</button>
+      <button class="px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition">Compare</button>
+    </div>
+  </div>
+</div>
+
+<!-- List Card 5 -->
+<div class="bg-white rounded-2xl shadow-card overflow-hidden hover:shadow-lg transition flex flex-col md:flex-row">
+  <div class="md:w-1/3">
+    <img class="h-56 md:h-full w-full object-cover" src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800" alt="">
+  </div>
+  <div class="p-6 flex-1">
+    <h3 class="text-xl font-semibold text-gray-800 hover:text-emerald-700 transition">Modern Office Space</h3>
+    <p class="text-sm text-gray-500">San Francisco, CA</p>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-600">
+      <p><span class="font-medium">Token ID:</span> NFT-005</p>
+      <p><span class="font-medium">Price:</span> <span class="text-emerald-600 font-semibold">$3.8M</span></p>
+      <p><span class="font-medium">Valuation:</span> $4.2M</p>
+      <p><span class="font-medium">Status:</span> <span class="text-emerald-600 font-semibold">Available</span></p>
+      <p><span class="font-medium">Type:</span> Commercial</p>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button class="px-6 py-2.5 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-xl font-semibold hover:from-emerald-800 hover:to-emerald-900 active:scale-95 transition">View Details</button>
+      <button class="px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition">Compare</button>
+    </div>
+  </div>
+</div>
+
+    </section>
+  </main>
+
+  <!-- JS for toggles -->
+  <script>
+    const gridBtn = document.getElementById('gridBtn');
+    const listBtn = document.getElementById('listBtn');
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+
+
+function setActive(view) {
+  if (view === 'grid') {
+    gridBtn.className = "h-11 w-11 rounded-lg flex items-center justify-center transition bg-emerald-700 text-white shadow-sm hover:bg-emerald-800 focus:outline-none focus:ring-1 focus:ring-emerald-300";
+    listBtn.className = "h-11 w-11 rounded-lg flex items-center justify-center transition border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-emerald-300";
+    gridView.classList.remove("hidden");
+    listView.classList.add("hidden");
+  } else {
+    listBtn.className = "h-11 w-11 rounded-lg flex items-center justify-center transition bg-emerald-700 text-white shadow-sm hover:bg-emerald-800 focus:outline-none focus:ring-1 focus:ring-emerald-300";
+    gridBtn.className = "h-11 w-11 rounded-lg flex items-center justify-center transition border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-emerald-300";
+    listView.classList.remove("hidden");
+    gridView.classList.add("hidden");
+  }
+}
+
+    gridBtn.addEventListener('click', () => setActive('grid'));
+    listBtn.addEventListener('click', () => setActive('list'));
+    setActive('grid');
+  </script>
+
+{% endblock %}

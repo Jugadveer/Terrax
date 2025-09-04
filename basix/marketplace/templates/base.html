@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Basix{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-green': '#2E7D32',
+            'brand-light': '#4CAF50',
+            'brand-dark': '#1B5E20',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Footer Styles */
+    .basix-footer { background-color: rgb(230, 228, 228); padding: 60px 20px 30px 20px; }
+    .footer-brand { display: flex; align-items: center; margin-bottom: 20px; }
+    .footer-brand i { color: #2E7D32; font-size: 1.5rem; margin-right: 10px; }
+    .footer-brand h5 { color: #1f2937; font-weight: 700; margin: 0; }
+    .footer-description { color: #6b7280; font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px; max-width: 300px; }
+    .footer-social { display: flex; gap: 15px; margin-bottom: 40px; }
+    .footer-social a { color: #6b7280; font-size: 1.2rem; transition: color 0.3s ease; }
+    .footer-social a:hover { color: #2E7D32; }
+    .footer-links { list-style: none; padding: 0; margin: 0; }
+    .footer-links li { margin-bottom: 12px; }
+    .footer-links a { color: #6b7280; text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease; }
+    .footer-links a:hover { color: #2E7D32; }
+    .newsletter-form { display: flex; gap: 10px; margin-bottom: 30px; }
+    .newsletter-input { flex: 1; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; outline: none; }
+    .newsletter-input:focus { border-color: #2E7D32; box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2); }
+    .newsletter-btn { background: #2E7D32; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease; }
+    .newsletter-btn:hover { background: #1B5E20; }
+    .footer-bottom { border-top: 1px solid #e5e7eb; padding-top: 25px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .footer-powered { display: flex; align-items: center; gap: 8px; color: #6b7280; font-size: 0.85rem; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+  <!-- NAVBAR -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        
+        <!-- Logo -->
+        <a href="{% url 'landing' %}" class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 21h18M9 21V9h6v12M3 21V9l9-6 9 6v12" />
+          </svg>
+          <span class="text-2xl font-bold text-brand-green">Basix</span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex space-x-8 font-medium">
+          <a href="{% url 'landing' %}" class="relative group text-gray-700 hover:text-brand-green transition">Home
+            <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-brand-green transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="{% url 'marketplace' %}" class="relative group text-gray-700 hover:text-brand-green transition">Marketplace
+            <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-brand-green transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="{% url 'dashboard' %}" class="relative group text-gray-700 hover:text-brand-green transition">Dashboard
+            <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-brand-green transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#" class="relative group text-gray-700 hover:text-brand-green transition">About
+            <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-brand-green transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#" class="relative group text-gray-700 hover:text-brand-green transition">Contact
+            <span class="absolute left-0 -bottom-1 w-0 h-0.5 bg-brand-green transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </nav>
+
+        <!-- Auth Buttons -->
+        <div class="hidden md:flex space-x-4">
+          <button onclick="openModal('loginModal')"  class="px-4 py-2 rounded-lg border border-brand-green text-brand-green hover:bg-brand-green hover:text-white transition">
+            Login
+          </button>
+          <button onclick="openModal('signupModal')" class="px-4 py-2 rounded-lg bg-brand-green text-white hover:bg-brand-dark transition">
+            Sign Up
+          </button>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden">
+          <button id="menu-toggle" class="focus:outline-none">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-menu" class="md:hidden hidden px-4 pb-4 space-y-3">
+      <a href="{% url 'landing' %}" class="block text-gray-700 hover:text-brand-green">Home</a>
+      <a href="{% url 'marketplace' %}" class="block text-gray-700 hover:text-brand-green">Marketplace</a>
+      <a href="{% url 'dashboard' %}" class="block text-gray-700 hover:text-brand-green">Dashboard</a>
+      <a href="#" class="block text-gray-700 hover:text-brand-green">About</a>
+      <a href="#" class="block text-gray-700 hover:text-brand-green">Contact</a>
+      <button onclick="openModal('loginModal')" class="w-full px-4 py-2 rounded-lg border border-brand-green text-brand-green hover:bg-brand-green hover:text-white transition">
+        Login
+      </button>
+      <button onclick="openModal('signupModal')" class="w-full px-4 py-2 rounded-lg bg-brand-green text-white hover:bg-brand-dark transition">
+        Sign Up
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+ <main class="flex-grow" >
+    {% block content %}
+    <!-- Page-specific content goes here -->
+    {% endblock %}
+  </main>
+  <!-- Footer -->
+<footer class="basix-footer" >
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+    
+    <!-- Brand -->
+    <div>
+      <div class="footer-brand">
+        <!-- Updated SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 21h18M9 21V9h6v12M3 21V9l9-6 9 6v12" />
+        </svg>
+        <h5>Basix</h5>
+      </div>
+      <p class="footer-description">
+        Transforming real estate with secure, tokenized phigital asset investments.
+      </p>
+      <div class="footer-social">
+        <a href="#"><i class="bi bi-twitter"></i></a>
+        <a href="#"><i class="bi bi-linkedin"></i></a>
+        <a href="#"><i class="bi bi-facebook"></i></a>
+        <a href="#"><i class="bi bi-instagram"></i></a>
+      </div>
+    </div>
+
+    <!-- Platform Links -->
+    <div>
+      <h6 class="font-semibold mb-2">Platform</h6>
+      <ul class="footer-links">
+        <li><a href="{% url 'landing' %}">Home</a></li>
+        <li><a href="{% url 'marketplace' %}">Marketplace</a></li>
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </div>
+
+    <!-- Community -->
+    <div>
+      <h6 class="font-semibold mb-2">Community</h6>
+      <ul class="footer-links">
+        <li><a href="#">Support</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">Guides</a></li>
+      </ul>
+    </div>
+
+    <!-- Legal -->
+    <div>
+      <h6 class="font-semibold mb-2">Legal</h6>
+      <ul class="footer-links">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+
+    <!-- Newsletter -->
+    <div>
+      <h6 class="font-semibold mb-2">Stay Updated</h6>
+      <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+        <input type="email" class="newsletter-input" placeholder="Your email" required />
+        <button type="submit" class="newsletter-btn"><i class="bi bi-arrow-right"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+<div class="footer-bottom flex flex-col items-center gap-2" style="margin-top: -10px;">
+  <div class="footer-powered flex items-center gap-2">
+    <span>Powered by</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3 21h18M9 21V9h6v12M3 21V9l9-6 9 6v12" />
+    </svg>
+    <a href="#" class="text-gray-600 hover:text-brand-green">Phigital Assets</a>
+  </div>
+</div>
+
+</footer>
+
+
+<!-- ENHANCED LOGIN MODAL -->
+<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50 transition-opacity duration-500 ease-in-out opacity-0">
+  <div class="bg-white rounded-3xl w-full max-w-md p-8 relative shadow-2xl transform scale-95 transition-transform duration-500 ease-in-out">
+    <!-- Close Button -->
+    <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl">&times;</button>
+
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
+
+    <!-- Login Form -->
+    <form class="space-y-5">
+      <div class="relative">
+        <input type="email" placeholder="you@example.com" id="loginEmail" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      <div class="relative">
+        <input type="password" placeholder="********" id="loginPassword" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <button type="button" onclick="togglePassword('loginPassword')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          <i class="bi bi-eye"></i>
+        </button>
+      </div>
+
+      <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-800 transition transform active:scale-95">Login</button>
+    </form>
+
+    <p class="text-sm text-gray-600 mt-5 text-center">
+      Don't have an account? 
+      <button onclick="openModal('signupModal'); closeModal('loginModal')" class="text-emerald-600 font-medium hover:underline">Sign Up</button>
+    </p>
+  </div>
+</div>
+
+<!-- ENHANCED SIGNUP MODAL -->
+<div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50 transition-opacity duration-500 ease-in-out opacity-0">
+  <div class="bg-white rounded-3xl w-full max-w-md p-8 relative shadow-2xl transform scale-95 transition-transform duration-500 ease-in-out">
+    <!-- Close Button -->
+    <button onclick="closeModal('signupModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl">&times;</button>
+
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
+
+    <!-- Sign-Up Form -->
+    <form class="space-y-5">
+      <div class="relative">
+        <input type="text" placeholder="Full Name" id="signupName" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-person absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      <div class="relative">
+        <input type="email" placeholder="you@example.com" id="signupEmail" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      <div class="relative">
+        <input type="password" placeholder="********" id="signupPassword" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <button type="button" onclick="togglePassword('signupPassword')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          <i class="bi bi-eye"></i>
+        </button>
+      </div>
+
+      <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-800 transition transform active:scale-95">Sign Up</button>
+    </form>
+
+    <p class="text-sm text-gray-600 mt-5 text-center">
+      Already have an account? 
+      <button onclick="openModal('loginModal'); closeModal('signupModal')" class="text-emerald-600 font-medium hover:underline">Login</button>
+    </p>
+  </div>
+</div>
+
+<!-- MODAL SCRIPTS -->
+<script>
+function openModal(id){
+  const modal = document.getElementById(id);
+  modal.classList.remove('hidden');
+  setTimeout(()=> modal.classList.remove('opacity-0'), 10); // smooth fade in
+  modal.querySelector('div').classList.add('scale-100');
+}
+
+function closeModal(id){
+  const modal = document.getElementById(id);
+  modal.classList.add('opacity-0'); // fade out
+  modal.querySelector('div').classList.remove('scale-100');
+  setTimeout(()=> modal.classList.add('hidden'), 300);
+}
+
+function togglePassword(id){
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
+
+
+  <!-- Scripts -->
+  <script>
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+    menuToggle.addEventListener("click", () => mobileMenu.classList.toggle("hidden"));
+
+    function handleNewsletter(e) {
+      e.preventDefault();
+      alert("Thank you for subscribing!");
+    }
+  </script>
+</body>
+</html>
