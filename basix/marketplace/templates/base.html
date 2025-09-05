@@ -86,9 +86,15 @@
 
         <!-- Auth Buttons -->
         <div class="hidden md:flex space-x-4">
-          <button onclick="openModal('loginModal')"  class="px-4 py-2 rounded-lg border border-brand-green text-brand-green hover:bg-brand-green hover:text-white transition">
-            Login
-          </button>
+          
+        {% if user.is_authenticated %}
+          <button onclick="location.href='{% url 'logout' %}'"
+                  class="px-4 py-2 text-red-600">Logout</button>
+        {% else %}
+          <button onclick="openModal('loginModal')" 
+                  class="px-4 py-2 text-emerald-600">Login</button>
+        {% endif %}
+
           <button onclick="openModal('signupModal')" class="px-4 py-2 rounded-lg bg-brand-green text-white hover:bg-brand-dark transition">
             Sign Up
           </button>
@@ -216,24 +222,38 @@
     <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl">&times;</button>
 
     <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
+{% if messages %}
+  <div >
+    {% for message in messages %}
+      <div class="px-4 py-2 rounded-xl shadow-md 
+                  {% if message.tags == 'error' %} bg-red-500 text-white
+                  {% elif message.tags == 'success' %} bg-green-500 text-white
+                  {% else %} bg-gray-700 text-white {% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
     <!-- Login Form -->
-    <form class="space-y-5">
-      <div class="relative">
-        <input type="email" placeholder="you@example.com" id="loginEmail" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
-        <i class="bi bi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-      </div>
+    <form method="POST" action="{% url 'login' %}" class="space-y-5">
+  {% csrf_token %}
+  <div class="relative">
+    <input type="text" name="username" placeholder="Username" required
+           class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+    <i class="bi bi-person absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+  </div>
 
-      <div class="relative">
-        <input type="password" placeholder="********" id="loginPassword" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
-        <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <button type="button" onclick="togglePassword('loginPassword')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-          <i class="bi bi-eye"></i>
-        </button>
-      </div>
+  <div class="relative">
+    <input type="password" name="password" placeholder="********" required
+           class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+    <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+  </div>
 
-      <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-800 transition transform active:scale-95">Login</button>
-    </form>
+  <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-800 transition transform active:scale-95">Login</button>
+</form>
+
+
 
     <p class="text-sm text-gray-600 mt-5 text-center">
       Don't have an account? 
@@ -241,7 +261,6 @@
     </p>
   </div>
 </div>
-
 <!-- ENHANCED SIGNUP MODAL -->
 <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50 transition-opacity duration-500 ease-in-out opacity-0">
   <div class="bg-white rounded-3xl w-full max-w-md p-8 relative shadow-2xl transform scale-95 transition-transform duration-500 ease-in-out">
@@ -250,25 +269,74 @@
 
     <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
 
+    {% if messages %}
+      <div class="fixed top-5 right-5 z-50 space-y-2">
+        {% for message in messages %}
+          <div class="px-4 py-2 rounded-xl shadow-md 
+                      {% if message.tags == 'error' %} bg-red-500 text-white
+                      {% elif message.tags == 'success' %} bg-green-500 text-white
+                      {% else %} bg-gray-700 text-white {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <!-- Sign-Up Form -->
-    <form class="space-y-5">
+    <form method="POST" action="{% url 'signup' %}" class="space-y-5">
+      {% csrf_token %}
       <div class="relative">
-        <input type="text" placeholder="Full Name" id="signupName" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <input type="text" name="username" placeholder="Username" required
+               class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
         <i class="bi bi-person absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
       </div>
 
       <div class="relative">
-        <input type="email" placeholder="you@example.com" id="signupEmail" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <input type="email" name="email" placeholder="you@example.com" required
+               class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
         <i class="bi bi-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
       </div>
 
+      <!-- Phone Number -->
       <div class="relative">
-        <input type="password" placeholder="********" id="signupPassword" class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
-        <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <button type="button" onclick="togglePassword('signupPassword')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-          <i class="bi bi-eye"></i>
-        </button>
+        <input type="text" name="phone" placeholder="Phone Number" required
+               class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-telephone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
       </div>
+      
+
+
+
+
+      <div class="relative">
+        <input type="password" name="password1" placeholder="********" required
+               class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      <div class="relative">
+        <input type="password" name="password2" placeholder="Confirm Password" required
+               class="w-full px-4 py-3 pl-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 transition duration-300" />
+        <i class="bi bi-lock-fill absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      
+  <!-- Wallet Connect -->
+<div class="relative">
+  <button type="button" id="connectWalletBtn"
+          class="w-full py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl font-semibold hover:from-yellow-600 hover:to-yellow-700 transition transform active:scale-95">
+    <i class="bi bi-wallet2 mr-2"></i> Connect MetaMask Wallet(Optional)
+  </button>
+
+  <!-- Hidden input for storing wallet address -->
+  <input type="hidden" name="wallet_address" id="walletAddressInput">
+</div>
+
+<!-- Connected Message -->
+<div id="walletConnectedMsg" class="hidden mt-3 text-center text-green-600 font-medium">
+  ✅ Wallet Connected: <span id="walletAddressDisplay"></span>
+</div>
+
 
       <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-800 transition transform active:scale-95">Sign Up</button>
     </form>
@@ -279,6 +347,46 @@
     </p>
   </div>
 </div>
+
+<script>
+
+async function connectWallet() {
+  if (typeof window.ethereum === "undefined") {
+    alert("MetaMask is not installed!");
+    return;
+  }
+
+  try {
+    // Request wallet connection
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const account = accounts[0];
+
+    // Save to hidden input
+    document.getElementById("walletAddressInput").value = account;
+
+    // Hide button, show connected message
+    document.getElementById("connectWalletBtn").classList.add("hidden");
+    document.getElementById("walletConnectedMsg").classList.remove("hidden");
+    document.getElementById("walletAddressDisplay").innerText = account.substring(0, 6) + "..." + account.slice(-4);
+
+  } catch (err) {
+    console.error("Wallet connection failed:", err);
+    alert("Failed to connect wallet");
+  }
+}
+
+// Attach event
+document.addEventListener("DOMContentLoaded", () => {
+  const connectBtn = document.getElementById("connectWalletBtn");
+  if (connectBtn) {
+    connectBtn.addEventListener("click", connectWallet);
+  }
+});
+</script>
+
+
+
+
 
 <!-- MODAL SCRIPTS -->
 <script>
