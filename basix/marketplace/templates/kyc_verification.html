@@ -1,0 +1,72 @@
+<!-- Add Listing Button -->
+{% if user.is_authenticated %}
+  {% if user.profile.kyc_verified %}
+    <!-- ✅ Show Add Listing Modal Button -->
+    <button 
+      onclick="openAddListingModal()" 
+      class="px-6 py-3 bg-emerald-600 text-white rounded-xl shadow-lg hover:bg-emerald-700 transition">
+      ➕ Add Listing
+    </button>
+  {% else %}
+    <!-- ❌ If not verified, show KYC redirect -->
+    <button 
+  onclick="openKycModal()" 
+  class="px-6 py-3 bg-yellow-500 text-white rounded-xl shadow-lg hover:bg-yellow-600 transition">
+  🔒 Verify KYC to Add Listing
+</button>
+
+<!-- KYC Modal -->
+<!-- KYC Modal -->
+<div id="kycModal" 
+     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative"> 
+    <!-- smaller: max-w-md instead of max-w-lg/full -->
+
+    <!-- Close button -->
+    <button onclick="closeKycModal()" 
+            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+
+    <h2 class="text-xl font-semibold mb-4 text-center">KYC Verification</h2>
+
+    <!-- KYC Container -->
+    <div id="kyc-container" class="w-full h-[450px] border rounded-lg overflow-hidden">
+      <!-- Sumsub SDK will inject content here -->
+    </div>
+  </div>
+</div>
+
+  {% endif %}
+{% else %}
+  <!-- If not logged in -->
+  <a href="{% url 'login' %}" 
+     class="px-6 py-3 bg-gray-500 text-white rounded-xl shadow-lg hover:bg-gray-600 transition">
+    🔑 Login to Add Listing
+  </a>
+{% endif %}
+
+
+
+<script>
+  function openKycModal(){
+    document.getElementById("kycModal").classList.remove("hidden");
+
+    // ✅ Initialize Sumsub WebSDK
+    const applicantToken = "{{ applicant_token }}"; // Pass this from Django backend
+    const flowName = "kyc_flow"; // defined in Sumsub dashboard
+
+    SumsubKYC.init("#sumsub-websdk", applicantToken, {
+      lang: "en", 
+      onMessage: (type, payload) => {
+        console.log("Message:", type, payload);
+      },
+      onError: (error) => {
+        console.error("Error:", error);
+      }
+    });
+  }
+
+  function closeKycModal(){
+    document.getElementById("kycModal").classList.add("hidden");
+  }
+</script>
+
