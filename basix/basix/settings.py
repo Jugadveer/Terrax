@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -119,3 +120,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# settings.py
+
+
+# Pinata settings
+PINATA_API_KEY = config('PINATA_API_KEY')
+PINATA_SECRET_API_KEY = config('PINATA_SECRET_API_KEY')
+PINATA_BASE_URL = config('PINATA_BASE_URL', default='https://api.pinata.cloud/pinning')

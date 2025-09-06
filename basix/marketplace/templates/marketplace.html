@@ -99,29 +99,25 @@
 
 
 
-
-    <!-- Add Listing Modal (HIGH Z-INDEX, backdrop, scroll lock) -->
-
-    <!-- Add Listing Modal -->
-<div id="addListingModal"
-     class="fixed inset-0 hidden z-[9999]">
+  <!-- Add Listing Modal -->
+<div id="addListingModal" class="fixed inset-0 hidden z-[9999] overflow-y-auto">
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
   <!-- Centered container -->
   <div class="relative z-[10000] flex items-center justify-center min-h-full p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
       <!-- Close button -->
       <button onclick="closeAddListingModal()"
               class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl leading-none">
         &times;
       </button>
 
-      <h2 class="text-2xl font-semibold mb-4" id="modalTitle">Step 1 of 4: Upload Media</h2>
+      <h2 class="text-2xl font-semibold mb-4" id="modalTitle">Step 1 of 5: Upload Media</h2>
 
       <!-- Progress bar -->
       <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
-        <div id="progressBar" class="bg-emerald-500 h-2 rounded-full w-[25%]"></div>
+        <div id="progressBar" class="bg-emerald-500 h-2 rounded-full w-[20%]"></div>
       </div>
 
       <form id="listingForm" class="space-y-4" enctype="multipart/form-data">
@@ -129,74 +125,88 @@
 
         <!-- Step 1: Media -->
         <div class="step" id="step1">
-          <div>
-            <label class="block text-gray-700 mb-1">Property Images *</label>
-            <input type="file" name="images" multiple required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
-          <div>
-            <label class="block text-gray-700 mb-1 mt-2">Property Video (optional)</label>
-            <input type="file" name="video"
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
+          <label class="block text-gray-700 mb-1">Property Images *</label>
+          <input type="file" name="images" multiple required
+                 class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Property Video (optional)</label>
+          <input type="file" name="video"
+                 class="w-full border rounded-lg px-3 py-2">
         </div>
 
-        <!-- Step 2: Details -->
+        <!-- Step 2: Property Details -->
         <div class="step hidden" id="step2">
-          <div>
-            <label class="block text-gray-700 mb-1">Title *</label>
-            <input type="text" name="title" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
-          <div>
-            <label class="block text-gray-700 mb-1 mt-2">Description *</label>
-            <textarea name="description" rows="4" required
-                      class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
-          </div>
-          <div>
-            <label class="block text-gray-700 mb-1 mt-2">Location *</label>
-            <input type="text" name="location" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
-          <div>
-            <label class="block text-gray-700 mb-1 mt-2">Property Type *</label>
-            <select name="property_type" required
-                    class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-              <option value="">Select Type</option>
-              <option>Apartment</option>
-              <option>Villa</option>
-              <option>Commercial</option>
-              <option>Land</option>
-            </select>
-          </div>
+          <label class="block text-gray-700 mb-1">Title *</label>
+          <input type="text" name="title" required class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Description *</label>
+          <textarea name="description" rows="3" required class="w-full border rounded-lg px-3 py-2"></textarea>
+
+          <label class="block text-gray-700 mb-1 mt-2">Location *</label>
+          <input type="text" name="location" required class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Property Type *</label>
+          <select name="property_type" required class="w-full border rounded-lg px-3 py-2">
+            <option value="">Select Type</option>
+            <option>Apartment</option>
+            <option>Villa</option>
+            <option>Commercial</option>
+            <option>Land</option>
+          </select>
+
+          <label class="block text-gray-700 mb-1 mt-2">Size (sq.ft)</label>
+          <input type="number" step="0.01" name="size" class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Bedrooms</label>
+          <input type="number" name="bedrooms" class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Year Built</label>
+          <input type="number" name="year_built" class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Ownership Type</label>
+          <input type="text" name="ownership_type" class="w-full border rounded-lg px-3 py-2">
         </div>
 
         <!-- Step 3: Compliance -->
         <div class="step hidden" id="step3">
-          <div>
-            <label class="block text-gray-700 mb-1">Ownership Documents *</label>
-            <input type="file" name="ownership_docs" multiple required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
-          <div>
-            <label class="block text-gray-700 mb-1 mt-2">KYC / Identity Document *</label>
-            <input type="file" name="kyc_doc" required
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
-          <div>
-            <label class="block text-gray-700 mb-1 mt-2">Other Legal Documents (optional)</label>
-            <input type="file" name="other_docs" multiple
-                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-          </div>
+          <label class="block text-gray-700 mb-1">Title Deed *</label>
+          <input type="file" name="title_deed" required class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Tax Certificate *</label>
+          <input type="file" name="tax_certificate" required class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Utility Bills *</label>
+          <input type="file" name="utility_bills" required class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">KYC / Identity Document *</label>
+          <input type="file" name="kyc_doc" required class="w-full border rounded-lg px-3 py-2">
+
+          <label class="block text-gray-700 mb-1 mt-2">Other Legal Documents (optional)</label>
+          <input type="file" name="other_docs" multiple class="w-full border rounded-lg px-3 py-2">
         </div>
 
-        <!-- Step 4: Review -->
+        <!-- Step 4: Pricing -->
         <div class="step hidden" id="step4">
-          <p class="text-gray-700 mb-3">Review all your details before submitting your listing.</p>
+          <label class="block text-gray-700 mb-1">Asking Price (₹)</label>
+          <input type="number" step="0.01" name="price" class="w-full border rounded-lg px-3 py-2">
+
+          <label class="flex items-center mt-3">
+            <input type="checkbox" name="fractionalisation" value="true" class="mr-2">
+            Fractionalisation Option
+          </label>
+
+          <label class="flex items-center mt-3">
+            <input type="checkbox" name="let_agent_suggest" value="true" class="mr-2">
+            Let Valuation Agent Suggest Price
+          </label>
+        </div>
+
+        <!-- Step 5: Preview -->
+        <div class="step hidden" id="step5">
+          <div id="previewContent" class="bg-gray-100 p-3 rounded-lg mb-4 text-sm text-gray-800"></div>
           <div class="form-check">
-            <input type="checkbox" name="confirm" required
-                   class="form-check-input rounded border-gray-300 focus:ring-2 focus:ring-emerald-400">
-            <label class="form-check-label text-gray-700">I confirm all information is correct.</label>
+            <input type="checkbox" name="confirm" required class="mr-2">
+            <label>I confirm all information is correct.</label>
           </div>
         </div>
 
@@ -217,114 +227,179 @@
 </div>
 
 <script>
-  let currentStep = 1;
-  const totalSteps = 4;
-  let listingId = null; // to store listing ID after first save
+let currentStep = 1;
+const totalSteps = 5;
+let listingId = null;
 
-  function showStep(step) {
-    document.querySelectorAll('.step').forEach((s, i) => s.classList.add('hidden'));
-    document.getElementById(`step${step}`).classList.remove('hidden');
 
-    document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
-    document.getElementById('nextBtn').classList.toggle('hidden', step === totalSteps);
-    document.getElementById('submitBtn').classList.toggle('hidden', step !== totalSteps);
+// Show loader overlay
+function showLoader() {
+  // Prevent adding multiple overlays
+  if (document.getElementById('loaderOverlay')) return;
 
-    document.getElementById('progressBar').style.width = `${(step/totalSteps)*100}%`;
-    document.getElementById('modalTitle').innerText = `Step ${step} of ${totalSteps}`;
-  }
+  const loader = document.createElement('div');
+  loader.id = 'loaderOverlay';
+  loader.innerHTML = `
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[11000]">
+      <div class="bg-white p-6 rounded-lg shadow-lg text-lg font-medium flex items-center gap-3">
+        <svg class="animate-spin h-6 w-6 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        Uploading listing... Please wait
+      </div>
+    </div>`;
+  document.body.appendChild(loader);
 
-  async function saveStep(step) {
-    const formData = new FormData();
-    if (listingId) formData.append('listing_id', listingId);
+  // Disable buttons
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('submitBtn').disabled = true;
+}
 
-    const stepDiv = document.getElementById(`step${step}`);
-    stepDiv.querySelectorAll('input, select, textarea').forEach(input => {
-      if (input.type === 'file') {
-        Array.from(input.files).forEach(file => formData.append(input.name, file));
-      } else {
-        formData.append(input.name, input.value);
-      }
-    });
+// Hide loader overlay
+function hideLoader() {
+  const loader = document.getElementById('loaderOverlay');
+  if (loader) loader.remove();
 
+  // Re-enable buttons
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('submitBtn').disabled = false;
+}
+
+
+
+function showStep(step) {
+  document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+  document.getElementById(`step${step}`).classList.remove('hidden');
+
+  document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
+  document.getElementById('nextBtn').classList.toggle('hidden', step === totalSteps);
+  document.getElementById('submitBtn').classList.toggle('hidden', step !== totalSteps);
+
+  document.getElementById('progressBar').style.width = `${(step / totalSteps) * 100}%`;
+  document.getElementById('modalTitle').innerText = `Step ${step} of ${totalSteps}`;
+
+  if (step === 5) generatePreview();
+}
+
+async function saveStep(step) {
+  const formData = new FormData();
+  if (listingId) formData.append('listing_id', listingId);
+
+  const stepDiv = document.getElementById(`step${step}`);
+  stepDiv.querySelectorAll('input, select, textarea').forEach(input => {
+    if (input.type === 'file') {
+      Array.from(input.files).forEach(file => formData.append(input.name, file));
+    } else if ((input.type === 'checkbox' && input.checked) || input.type !== 'checkbox') {
+      formData.append(input.name, input.value);
+    }
+  });
+
+  try {
     const res = await fetch(`/save_listing_step/${step}/`, {
       method: 'POST',
       body: formData,
-      headers: {'X-CSRFToken': '{{ csrf_token }}'}
+      headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
     });
     const data = await res.json();
     if (data.success && data.listing_id) {
-      listingId = data.listing_id; // store ID for next steps
+      listingId = data.listing_id;
       return true;
     } else {
       alert(data.error || 'Error saving step');
       return false;
     }
+  } catch (err) {
+    console.error(err);
+    alert('An unexpected error occurred while saving step.');
+    return false;
   }
+}
 
-  async function nextStep() {
-    const saved = await saveStep(currentStep);
-    if (saved && currentStep < totalSteps) {
-      currentStep++;
-      showStep(currentStep);
-    }
-  }
-
-  function prevStep() {
-    if (currentStep > 1) {
-      currentStep--;
-      showStep(currentStep);
-    }
-  }
-
-  showStep(currentStep);
-
-  
-  document.getElementById('listingForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-
-  // Save current step first
+async function nextStep() {
   const saved = await saveStep(currentStep);
-  if (saved) {
-    // Create FormData and append listingId
-    const formData = new FormData(this);
-    if (listingId) formData.append('listing_id', listingId);
+  if (saved && currentStep < totalSteps) {
+    currentStep++;
+    showStep(currentStep);
+  }
+}
 
-    // Send to backend
+function prevStep() {
+  if (currentStep > 1) {
+    currentStep--;
+    showStep(currentStep);
+  }
+}
+
+function generatePreview() {
+  const previewDiv = document.getElementById("previewContent");
+  previewDiv.innerHTML = `
+    <h3 class="text-lg font-semibold mb-2">Property Preview</h3>
+    <p><strong>Title:</strong> ${document.querySelector('[name="title"]').value}</p>
+    <p><strong>Description:</strong> ${document.querySelector('[name="description"]').value}</p>
+    <p><strong>Location:</strong> ${document.querySelector('[name="location"]').value}</p>
+    <p><strong>Type:</strong> ${document.querySelector('[name="property_type"]').value}</p>
+    <p><strong>Size:</strong> ${document.querySelector('[name="size"]').value}</p>
+    <p><strong>Bedrooms:</strong> ${document.querySelector('[name="bedrooms"]').value}</p>
+    <p><strong>Year Built:</strong> ${document.querySelector('[name="year_built"]').value}</p>
+    <p><strong>Ownership:</strong> ${document.querySelector('[name="ownership_type"]').value}</p>
+    <p><strong>Asking Price:</strong> ₹${document.querySelector('[name="price"]').value}</p>
+    <p><strong>Fractionalisation:</strong> ${document.querySelector('[name="fractionalisation"]').checked ? "Yes" : "No"}</p>
+    <p><strong>Let Agent Suggest Price:</strong> ${document.querySelector('[name="let_agent_suggest"]').checked ? "Yes" : "No"}</p>
+  `;
+}
+
+// Submit Step 5
+document.getElementById('listingForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (currentStep !== totalSteps) return;
+
+  showLoader();
+
+  const formData = new FormData(this);
+  if (listingId) formData.append('listing_id', listingId);
+
+  try {
     const res = await fetch('/submit_listing/', {
       method: 'POST',
       body: formData,
-      headers: {'X-CSRFToken': '{{ csrf_token }}'}
+      headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
     });
-
     const data = await res.json();
 
-    // Debug: log backend response
-    console.log("Submit response:", data);
+    hideLoader();
 
     if (data.success) {
-      alert('Listing submitted successfully!');
+      alert('Listing submitted successfully! Metadata CID: ' + data.metadata_cid);
       closeAddListingModal();
-      location.reload();
+      window.location.reload();
     } else {
       alert('Error submitting listing: ' + (data.error || 'Unknown error'));
     }
+  } catch (err) {
+    hideLoader();
+    console.error(err);
+    alert('An unexpected error occurred. Check console.');
   }
 });
 
+function openAddListingModal() {
+  document.getElementById("addListingModal").classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+}
 
+function closeAddListingModal() {
+  document.getElementById("addListingModal").classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+}
 
-  function openAddListingModal() {
-    const m = document.getElementById("addListingModal");
-    m.classList.remove("hidden");
-    document.body.classList.add("overflow-hidden");
-  }
-
-  function closeAddListingModal() {
-    const m = document.getElementById("addListingModal");
-    m.classList.add("hidden");
-    document.body.classList.remove("overflow-hidden");
-  }
+showStep(currentStep);
 </script>
+
+
+
+
+
 
 </section>
 
