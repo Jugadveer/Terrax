@@ -1,0 +1,39 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+.venv311/
+
+# Database and uploads
+db.sqlite3
+db.sqlite3-journal
+/media/
+
+# Collected static output (built from /static)
+/staticfiles/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Skill library imported from the bot project for this workspace; it is a copy
+# of a shared library, not part of Basix.
+.claude/skills/
+
+# Snapshot of the database this rebuild replaced, kept locally for reference.
+docs/db.sqlite3.backup
+
+# Vercel CLI
+.vercel/
+# Editor and workspace settings, machine specific.
+.claude/
