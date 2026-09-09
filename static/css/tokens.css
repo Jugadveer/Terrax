@@ -1,0 +1,204 @@
+/* ==========================================================================
+   Design tokens
+   --------------------------------------------------------------------------
+   One accent (forest green, carried over from the original brand), one
+   neutral family (green-tinted stone), one radius scale, one motion curve.
+   Every colour below is declared once here and referenced by name everywhere
+   else, so a theme change is a change to this file only.
+   ========================================================================== */
+
+:root {
+  /* --- Brand: forest ---------------------------------------------------- */
+  --forest-50:  #eef5f0;
+  --forest-100: #d8e9df;
+  --forest-200: #b0d0bf;
+  --forest-300: #7fb098;
+  --forest-400: #4f8d70;
+  --forest-500: #2f7250;
+  --forest-600: #1f5c3e;
+  --forest-700: #174a32;
+  --forest-800: #113827;
+  --forest-900: #0b2419;
+
+  /* --- Neutrals: stone, tinted very slightly green ---------------------- */
+  --stone-0:   #ffffff;
+  --stone-25:  #fbfbf9;
+  --stone-50:  #f6f7f4;
+  --stone-100: #eeefeb;
+  --stone-200: #e0e2dc;
+  --stone-300: #c6c9c1;
+  --stone-400: #9ca29a;
+  --stone-500: #737a73;
+  --stone-600: #565c57;
+  --stone-700: #3d423e;
+  --stone-800: #262a27;
+  --stone-900: #171a18;
+  --stone-950: #0e100f;
+
+  /* --- Semantic state --------------------------------------------------- */
+  --gain:    #1f7a4d;
+  --loss:    #a23c2b;
+  --caution: #a06a14;
+  --info:    #2b5f7a;
+
+  /* --- Applied theme: light --------------------------------------------- */
+  --bg:            var(--stone-25);
+  --bg-sunken:     var(--stone-50);
+  --surface:       var(--stone-0);
+  --surface-muted: var(--stone-50);
+  --surface-inset: var(--stone-100);
+
+  --text:          var(--stone-900);
+  --text-muted:    var(--stone-600);
+  --text-subtle:   var(--stone-500);
+  --text-inverse:  var(--stone-25);
+
+  --line:          rgba(23, 26, 24, 0.10);
+  --line-strong:   rgba(23, 26, 24, 0.18);
+
+  --accent:        var(--forest-700);
+  --accent-hover:  var(--forest-800);
+  --accent-soft:   var(--forest-50);
+  --accent-line:   var(--forest-200);
+  --accent-text:   var(--forest-700);
+  --on-accent:     #ffffff;
+
+  /* Shadows carry the surface hue instead of pure black. */
+  --shadow-1: 0 1px 2px rgba(11, 36, 25, 0.05);
+  --shadow-2: 0 2px 4px rgba(11, 36, 25, 0.05), 0 8px 20px -8px rgba(11, 36, 25, 0.12);
+  --shadow-3: 0 4px 8px rgba(11, 36, 25, 0.06), 0 20px 48px -16px rgba(11, 36, 25, 0.20);
+
+  --scrim: rgba(14, 16, 15, 0.45);
+
+  /* --- Type ------------------------------------------------------------- */
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  --text-2xs: 0.6875rem;  /* 11px  labels */
+  --text-xs:  0.75rem;    /* 12px  meta */
+  --text-sm:  0.8125rem;  /* 13px  dense UI */
+  --text-base: 0.9375rem; /* 15px  body */
+  --text-md:  1.0625rem;  /* 17px  lead */
+  --text-lg:  1.375rem;   /* 22px  card titles */
+  --text-xl:  1.75rem;    /* 28px  section heads */
+  --text-2xl: 2.25rem;    /* 36px */
+  --text-3xl: 3rem;       /* 48px */
+  --text-display: clamp(2.5rem, 1.4rem + 4.4vw, 4.75rem);
+
+  /* --- Spacing: 4px base ------------------------------------------------ */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --s-10: 8rem;
+
+  /* --- Radii: tighter inside, softer outside ---------------------------- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-full: 999px;
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 140ms;
+  --t-base: 220ms;
+  --t-slow: 420ms;
+
+  /* --- Layers ----------------------------------------------------------- */
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-overlay: 300;
+  --z-dialog: 310;
+  --z-toast: 400;
+
+  /* --- Layout ----------------------------------------------------------- */
+  --page-max: 1320px;
+  --prose-max: 68ch;
+  --header-h: 64px;
+  color-scheme: light;
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme. Applied when the system asks for it, or when the user picks it
+   explicitly. Both selectors set the same values so the two paths never drift.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:            var(--stone-950);
+    --bg-sunken:     #0a0c0b;
+    --surface:       var(--stone-900);
+    --surface-muted: #1c201e;
+    --surface-inset: var(--stone-800);
+
+    --text:          var(--stone-50);
+    --text-muted:    var(--stone-400);
+    --text-subtle:   var(--stone-500);
+    --text-inverse:  var(--stone-950);
+
+    --line:          rgba(238, 239, 235, 0.10);
+    --line-strong:   rgba(238, 239, 235, 0.18);
+
+    --accent:        var(--forest-400);
+    --accent-hover:  var(--forest-300);
+    --accent-soft:   rgba(79, 141, 112, 0.12);
+    --accent-line:   rgba(79, 141, 112, 0.32);
+    --accent-text:   var(--forest-300);
+    --on-accent:     #071410;
+
+    --gain:    #52b384;
+    --loss:    #d97a66;
+    --caution: #d4a13c;
+    --info:    #6fa8c4;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.40);
+    --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.40), 0 8px 20px -8px rgba(0, 0, 0, 0.60);
+    --shadow-3: 0 4px 8px rgba(0, 0, 0, 0.45), 0 20px 48px -16px rgba(0, 0, 0, 0.70);
+
+    --scrim: rgba(0, 0, 0, 0.65);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:            var(--stone-950);
+  --bg-sunken:     #0a0c0b;
+  --surface:       var(--stone-900);
+  --surface-muted: #1c201e;
+  --surface-inset: var(--stone-800);
+
+  --text:          var(--stone-50);
+  --text-muted:    var(--stone-400);
+  --text-subtle:   var(--stone-500);
+  --text-inverse:  var(--stone-950);
+
+  --line:          rgba(238, 239, 235, 0.10);
+  --line-strong:   rgba(238, 239, 235, 0.18);
+
+  --accent:        var(--forest-400);
+  --accent-hover:  var(--forest-300);
+  --accent-soft:   rgba(79, 141, 112, 0.12);
+  --accent-line:   rgba(79, 141, 112, 0.32);
+  --accent-text:   var(--forest-300);
+  --on-accent:     #071410;
+
+  --gain:    #52b384;
+  --loss:    #d97a66;
+  --caution: #d4a13c;
+  --info:    #6fa8c4;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.40), 0 8px 20px -8px rgba(0, 0, 0, 0.60);
+  --shadow-3: 0 4px 8px rgba(0, 0, 0, 0.45), 0 20px 48px -16px rgba(0, 0, 0, 0.70);
+
+  --scrim: rgba(0, 0, 0, 0.65);
+  color-scheme: dark;
+}
