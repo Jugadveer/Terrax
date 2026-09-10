@@ -1,0 +1,23 @@
+{% comment %}
+  One form field: label, control, hint, errors. Used everywhere, so a label
+  can never go missing and an error can never end up somewhere other than
+  directly below the input it belongs to.
+{% endcomment %}
+<div class="field {% if field.errors %}has-error{% endif %}">
+  {% if field.field.widget.input_type == "checkbox" %}
+    <label class="check" for="{{ field.id_for_label }}">
+      {{ field }}
+      <span>{{ field.label }}{% if field.help_text %}<span class="field-hint" style="display:block">{{ field.help_text }}</span>{% endif %}</span>
+    </label>
+  {% else %}
+    <label for="{{ field.id_for_label }}">
+      {{ field.label }}{% if field.field.required %}<span class="req" aria-hidden="true">*</span>{% endif %}
+    </label>
+    {{ field }}
+    {% if field.help_text %}<span class="field-hint">{{ field.help_text }}</span>{% endif %}
+  {% endif %}
+
+  {% for error in field.errors %}
+    <span class="field-error" role="alert">{{ error }}</span>
+  {% endfor %}
+</div>

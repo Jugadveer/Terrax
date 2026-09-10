@@ -1,0 +1,32 @@
+{% load basix %}
+<nav class="mobile-nav" id="mobile-nav" aria-label="Main" hidden>
+  <a href="{% url 'properties:index' %}">Marketplace</a>
+  <a href="{% url 'properties:map' %}">Map</a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <a href="{% url 'market:portfolio' %}">Portfolio</a>
+    <a href="{% url 'market:offers' %}">Offers</a>
+    <a href="{% url 'accounts:my_listings' %}">My listings</a>
+    <a href="{% url 'accounts:watchlist' %}">Watchlist</a>
+    <a href="{% url 'accounts:settings' %}">Settings</a>
+  {% else %}
+    <a href="{% url 'core:how_it_works' %}">How it works</a>
+    <a href="{% url 'core:about' %}">About</a>
+  {% endif %}
+  <a href="{% url 'core:help' %}">Help</a>
+
+  <div class="stack" style="margin-top: var(--s-5)">
+    {% if user.is_authenticated %}
+      <a class="btn btn--solid btn--block" href="{% url 'properties:wizard' %}">
+        {% icon "plus" "icon icon--sm" %} List a property
+      </a>
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--outline btn--block">Sign out</button>
+      </form>
+    {% else %}
+      <a class="btn btn--solid btn--block" href="{% url 'accounts:sign_up' %}">Create account</a>
+      <a class="btn btn--outline btn--block" href="{% url 'accounts:login' %}">Sign in</a>
+    {% endif %}
+  </div>
+</nav>

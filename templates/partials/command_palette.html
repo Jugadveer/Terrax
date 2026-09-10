@@ -1,0 +1,56 @@
+{% load basix %}
+{% comment %}
+  Opened with Ctrl/Cmd K or the search button in the header. It is a real
+  <dialog>, so focus trapping, Escape, and the backdrop come from the browser
+  rather than from three hundred lines of JavaScript.
+{% endcomment %}
+<dialog class="palette" id="command-palette" aria-label="Search and navigate">
+  <form class="palette-card" method="post" action="{% url 'intelligence:natural_search' %}">
+    {% csrf_token %}
+    <div class="palette-input">
+      {% icon "magnifying-glass" "icon" %}
+      <input type="search" name="query" id="palette-query" autocomplete="off"
+             placeholder="3 bhk in Pune under 90 lakh" aria-label="Search properties">
+      <kbd class="mono">Esc</kbd>
+    </div>
+
+    <div class="palette-body">
+      <p class="label">Search</p>
+      <button type="submit" class="palette-row">
+        {% icon "sparkle" "icon icon--sm" %}
+        <span>Search for <strong data-palette-echo>anything</strong></span>
+        <kbd class="mono">Enter</kbd>
+      </button>
+
+      <p class="label" style="margin-top: var(--s-4)">Go to</p>
+      <a class="palette-row" href="{% url 'properties:index' %}">
+        {% icon "squares-four" "icon icon--sm" %}<span>Marketplace</span>
+      </a>
+      <a class="palette-row" href="{% url 'properties:map' %}">
+        {% icon "map-pin" "icon icon--sm" %}<span>Map view</span>
+      </a>
+      {% if user.is_authenticated %}
+        <a class="palette-row" href="{% url 'core:dashboard' %}">
+          {% icon "chart-line-up" "icon icon--sm" %}<span>Dashboard</span>
+        </a>
+        <a class="palette-row" href="{% url 'market:portfolio' %}">
+          {% icon "chart-pie-slice" "icon icon--sm" %}<span>Portfolio</span>
+        </a>
+        <a class="palette-row" href="{% url 'market:offers' %}">
+          {% icon "handshake" "icon icon--sm" %}<span>Offers</span>
+        </a>
+        <a class="palette-row" href="{% url 'properties:wizard' %}">
+          {% icon "plus" "icon icon--sm" %}<span>List a property</span>
+        </a>
+      {% else %}
+        <a class="palette-row" href="{% url 'accounts:sign_up' %}">
+          {% icon "user" "icon icon--sm" %}<span>Create an account</span>
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="palette-foot">
+      <span class="subtle">Plain language works. Try "villa in Goa with a pool under 4 crore".</span>
+    </div>
+  </form>
+</dialog>

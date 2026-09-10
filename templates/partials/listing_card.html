@@ -1,0 +1,75 @@
+{% load basix %}
+{% comment %}
+  One card, used by the marketplace, the landing page, the watchlist and the
+  seller profile. `watched` is a set of listing ids fetched once per page, so
+  the watch state costs no query per card.
+{% endcomment %}
+<article class="listing-card reveal">
+  <div class="listing-media">
+    {% with cover=listing.cover_image %}
+      {% if cover %}
+        <img src="{{ cover.display_url }}" alt="{{ cover.alt_text|default:listing.title }}"
+             width="640" height="420" loading="lazy" decoding="async">
+      {% else %}
+        <div class="placeholder">{% icon "image" "icon icon--lg" %}</div>
+      {% endif %}
+    {% endwith %}
+
+    <span class="listing-status badge badge--{{ listing.status_tone }}">
+      {{ listing.get_status_display }}
+    </span>
+
+    <div class="listing-actions">
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'properties:watch' listing.public_id %}"
+              hx-post="{% url 'properties:watch' listing.public_id %}"
+              hx-swap="outerHTML" hx-target="this">
+          {% csrf_token %}
+          <button type="submit" class="icon-chip {% if listing.id in watched %}is-on{% endif %}"
+                  aria-label="{% if listing.id in watched %}Remove from watchlist{% else %}Add to watchlist{% endif %}">
+            {% icon "heart" "icon icon--sm" %}
+          </button>
+        </form>
+      {% endif %}
+      <button type="button" class="icon-chip" data-compare="{{ listing.public_id }}"
+              aria-pressed="false" aria-label="Add to comparison">
+        {% icon "scales" "icon icon--sm" %}
+      </button>
+    </div>
+  </div>
+
+  <div class="listing-body">
+    <h3><a href="{{ listing.get_absolute_url }}">{{ listing.title }}</a></h3>
+
+    <div class="listing-meta">
+      {% icon "map-pin" "icon icon--sm" %}
+      <span class="truncate">{{ listing.location_label }}</span>
+    </div>
+
+    {% if listing.headline_spec %}
+      <p class="subtle" style="font-size: var(--text-xs)">{{ listing.headline_spec }}</p>
+    {% endif %}
+
+    {% if listing.fractional_enabled %}
+      <div>
+        <div class="row row--between" style="font-size: var(--text-2xs); margin-bottom: 4px">
+          <span class="subtle">{{ listing.fraction_sold_percent }}% taken</span>
+          <span class="mono subtle">{{ listing.shares_available|compact }} left</span>
+        </div>
+        <div class="meter"><span style="width: {{ listing.fraction_sold_percent }}%"></span></div>
+      </div>
+    {% endif %}
+
+    <div class="listing-price">
+      <span class="amount">{{ listing.asking_price|money:currency }}</span>
+      {% if listing.valuation_gap is not None %}
+        <span class="against {{ listing.valuation_gap|delta_class }}"
+              title="Against the independent valuation of {{ listing.valuation_estimate|money:currency }}">
+          {{ listing.valuation_gap|percent_signed }} vs estimate
+        </span>
+      {% elif listing.price_per_sqft %}
+        <span class="against subtle">{{ listing.price_per_sqft|money:currency }}/sq ft</span>
+      {% endif %}
+    </div>
+  </div>
+</article>

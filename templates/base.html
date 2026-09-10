@@ -1,0 +1,77 @@
+{% load static basix %}<!DOCTYPE html>
+<html lang="en" data-theme="{{ request.session.theme|default:theme_preference|default:'system' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site.description }}{% endblock %}">
+  <meta name="theme-color" content="#174a32" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e100f" media="(prefers-color-scheme: dark)">
+
+  <meta property="og:site_name" content="{{ site.name }}">
+  <meta property="og:title" content="{% block og_title %}{{ site.name }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site.description }}{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{% block og_image %}{% static 'img/og.png' %}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+
+  {% comment %}
+    The variable fonts cover every weight, so two files replace a stylesheet
+    request plus one file per weight. Preloaded because they are render
+    blocking for the first paint.
+  {% endcomment %}
+  <link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/geist-variable.woff2' %}" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="{% static 'fonts/geist-mono-variable.woff2' %}" crossorigin>
+
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+  {% block head %}{% endblock %}
+
+  {% comment %}
+    Resolve the theme before the first paint, otherwise a dark-mode user sees
+    a white flash on every navigation. Deliberately inline and synchronous.
+  {% endcomment %}
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('basix-theme');
+        if (stored) document.documentElement.dataset.theme = stored;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {% include "partials/header.html" %}
+  {% include "partials/mobile_nav.html" %}
+
+  <main class="main" id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/footer.html" %}
+
+  <div class="toast-stack" id="toasts" role="status" aria-live="polite">
+    {% for message in messages %}
+      <div class="toast toast--{{ message.tags|default:'info' }}">
+        {% icon "info" "icon icon--sm" %}
+        <p>{{ message }}</p>
+        <button type="button" class="btn btn--quiet btn--sm" data-dismiss-toast aria-label="Dismiss">
+          {% icon "x" "icon icon--sm" %}
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% include "partials/command_palette.html" %}
+
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" type="module"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
