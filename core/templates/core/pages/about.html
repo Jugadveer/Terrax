@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}About Basix{% endblock %}
+
+{% block content %}
+<div class="page">
+  <header class="page-header">
+    <h1>About</h1>
+    <p>
+      Basix started from a simple complaint: property listings tell you what a
+      place looks like and almost nothing about whether the paperwork is in
+      order.
+    </p>
+  </header>
+
+  <div class="split" style="margin-bottom: var(--s-9)">
+    <div class="prose">
+      <p>
+        Most property portals are advertising. The listing exists to get you to
+        call an agent, so it carries photographs, a price, and as little else as
+        the seller can get away with. Whether the title is clean, whether the
+        tax is paid, whether the asking price bears any relation to what
+        similar places sell for: all of that happens later, in private, after
+        you have already spent time on it.
+      </p>
+      <p>
+        Basix inverts the order. A listing cannot go live without its title
+        deed, a tax receipt and a utility bill. Those files are checked as they
+        arrive, and the result of the check is shown to buyers rather than kept
+        internally. Every listing carries a valuation calculated from comparable
+        properties, with the comparables on the page. Every listing carries a
+        risk score, with the factors that produced it on the page.
+      </p>
+      <p>
+        None of it is magic, and none of the numbers come from a language model.
+        The valuation is a weighted comparison, written out in plain Python, and
+        you can read the working on any listing.
+      </p>
+    </div>
+
+    <div class="stack">
+      <div class="stat-strip" style="grid-template-columns: repeat(2, 1fr)">
+        <div class="stat">
+          <span class="k">Listings</span>
+          <span class="v">{{ stats.listing_count }}</span>
+        </div>
+        <div class="stat">
+          <span class="k">Cities</span>
+          <span class="v">{{ stats.city_count }}</span>
+        </div>
+        <div class="stat">
+          <span class="k">Combined value</span>
+          <span class="v">{{ stats.total_value|money:currency }}</span>
+        </div>
+        <div class="stat">
+          <span class="k">Fractional</span>
+          <span class="v">{{ stats.fractional_count }}</span>
+        </div>
+      </div>
+
+      <div class="panel panel--pad">
+        <span class="label">Built with</span>
+        <div class="stack stack--tight" style="margin-top: var(--s-3); font-size: var(--text-sm)">
+          <div class="row row--between"><span class="muted">Backend</span><span class="mono">Django 5</span></div>
+          <div class="row row--between"><span class="muted">Frontend</span><span class="mono">HTML, CSS, HTMX</span></div>
+          <div class="row row--between"><span class="muted">Styling</span><span class="mono">Hand written, no framework</span></div>
+          <div class="row row--between"><span class="muted">Valuation</span><span class="mono">Comparable sales</span></div>
+          <div class="row row--between"><span class="muted">Language model</span><span class="mono">Optional</span></div>
+          <div class="row row--between"><span class="muted">Storage</span><span class="mono">SQLite, IPFS pinning</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="section section--sunken" style="border-radius: var(--r-xl); padding-inline: var(--s-6)">
+    <h2 style="margin-bottom: var(--s-5)">Three decisions worth explaining</h2>
+
+    <div class="faq-item">
+      <h3>The language model never decides a number</h3>
+      <p>
+        Every figure on the site comes from code you can read. When a model is
+        configured, it is handed the finished valuation and asked to explain it
+        in plain language, with an explicit instruction not to state a different
+        figure. With no model configured, the explanation is assembled from the
+        same data and the site behaves identically. Which one produced the text
+        is printed under it.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Nothing renders from a placeholder</h3>
+      <p>
+        Every count, price and chart on this site is a database read. An empty
+        deployment shows zeroes and empty states, not invented traction. That
+        sounds obvious, and it is the single most common thing a demonstration
+        gets wrong.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Ownership checks are queries, not conditionals</h3>
+      <p>
+        A listing you do not own is not loaded and then refused; it is filtered
+        out of the query by owner before it is ever fetched. The same is true of
+        offers, which are scoped to the two parties. There is no code path that
+        holds someone else's row and decides whether to allow it.
+      </p>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Help centre{% endblock %}
+
+{% block content %}
+<div class="page page--narrow">
+  <header class="page-header">
+    <h1>Help</h1>
+    <p>
+      The questions people actually ask. If yours is not here,
+      <a href="{% url 'core:contact' %}" style="color: var(--accent-text)">send it over</a>.
+    </p>
+  </header>
+
+  {% for topic in topics %}
+    <section class="faq-group">
+      <h2>{{ topic.title }}</h2>
+      {% for question, answer in topic.items %}
+        <div class="faq-item">
+          <h3>{{ question }}</h3>
+          <p>{{ answer }}</p>
+        </div>
+      {% endfor %}
+    </section>
+  {% endfor %}
+
+  <div class="panel panel--pad" style="margin-top: var(--s-7)">
+    <div class="row row--between row--wrap">
+      <div>
+        <h3 style="font-size: var(--text-base)">Still stuck?</h3>
+        <p class="muted" style="font-size: var(--text-sm); margin-top: var(--s-1)">
+          Tell us what you were trying to do and what happened instead.
+        </p>
+      </div>
+      <a class="btn btn--solid" href="{% url 'core:contact' %}">Get in touch</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

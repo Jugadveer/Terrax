@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Something went wrong{% endblock %}
+
+{% block content %}
+<div class="page error-page">
+  <span class="code">500</span>
+  <h1>Something went wrong at our end</h1>
+  <p>
+    The error has been logged. Nothing you were doing was lost: drafts and
+    offers are saved as you go.
+  </p>
+  <div class="row" style="margin-top: var(--s-3)">
+    <a class="btn btn--solid" href="{% url 'core:home' %}">Go home</a>
+    <a class="btn btn--outline" href="{% url 'core:contact' %}">Tell us what happened</a>
+  </div>
+</div>
+{% endblock %}

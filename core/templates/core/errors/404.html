@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<div class="page error-page">
+  <span class="code">404</span>
+  <h1>That page is not here</h1>
+  <p>
+    The link may be old, or the listing may have been withdrawn. The market is
+    still where you left it.
+  </p>
+  <div class="row" style="margin-top: var(--s-3)">
+    <a class="btn btn--solid" href="{% url 'properties:index' %}">Browse the market</a>
+    <a class="btn btn--outline" href="{% url 'core:home' %}">Go home</a>
+  </div>
+</div>
+{% endblock %}

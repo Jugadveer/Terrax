@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load static basix %}
+
+{% block title %}Basix, tokenised property with the paperwork attached{% endblock %}
+
+{% block content %}
+<section class="page hero">
+  <div class="hero-copy">
+    <h1>Property you can <em>check</em> before you buy.</h1>
+    <p>
+      Every listing on Basix carries its title deed, its tax receipts, an
+      independent valuation with the comparables shown, and a risk score you can
+      read line by line.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn--solid btn--lg" href="{% url 'properties:index' %}">
+        Browse the market
+        {% icon "arrow-right" "icon icon--sm" %}
+      </a>
+      <a class="btn btn--outline btn--lg" href="{% url 'core:how_it_works' %}">How it works</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <img src="{% static 'img/hero.jpg' %}" width="1200" height="960" fetchpriority="high"
+         alt="Apartment balconies on a residential building at dusk">
+    <div class="hero-card">
+      <div>
+        <span class="k">On the market</span>
+        <span class="v">{{ stats.listing_count }}</span>
+      </div>
+      <div>
+        <span class="k">Combined value</span>
+        <span class="v">{{ stats.total_value|money:currency }}</span>
+      </div>
+      <div>
+        <span class="k">Cities</span>
+        <span class="v">{{ stats.city_count }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% comment %}
+  Hairline separated figures. Every one is a database read; an empty
+  deployment shows zeroes rather than invented traction.
+{% endcomment %}
+<section class="page">
+  <div class="pulse">
+    <div>
+      <span class="k">Average asking price</span>
+      <span class="v">{{ stats.average_price|money:currency }}</span>
+    </div>
+    <div>
+      <span class="k">Open to fractions</span>
+      <span class="v">{{ stats.fractional_count }}</span>
+    </div>
+    <div>
+      <span class="k">Shares traded</span>
+      <span class="v">{{ stats.traded_value|money:currency }}</span>
+    </div>
+    <div>
+      <span class="k">Completed trades</span>
+      <span class="v">{{ stats.trade_count }}</span>
+    </div>
+  </div>
+</section>
+
+{% if featured %}
+<section class="page section">
+  <div class="section-head">
+    <div>
+      <h2>Recently verified</h2>
+      <p class="muted">Listings whose documents have already been through checks.</p>
+    </div>
+    <a class="btn btn--outline btn--sm" href="{% url 'properties:index' %}">
+      See all {{ stats.listing_count }}
+      {% icon "arrow-right" "icon icon--sm" %}
+    </a>
+  </div>
+
+  <div class="bento">
+    {% for listing in featured %}
+      {% include "partials/listing_card.html" %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="section section--sunken">
+  <div class="page">
+    <div class="section-head">
+      <div>
+        <h2>From listing to settled, in four moves</h2>
+        <p class="muted">Each step produces something a buyer can inspect afterwards.</p>
+      </div>
+    </div>
+
+    <div class="steps">
+      <article class="step reveal">
+        <div>
+          <h3>Put the property on the record</h3>
+          <p>
+            Photographs, the specification, and the three documents that matter:
+            title deed, property tax receipt, utility bill. The wizard saves as
+            you go and will not let a half filled listing through.
+          </p>
+        </div>
+        <div class="step-detail">
+          <div class="row"><span>Title deed</span><span>Required</span></div>
+          <div class="row"><span>Tax receipt</span><span>Required</span></div>
+          <div class="row"><span>Utility bill</span><span>Required</span></div>
+          <div class="row"><span>Encumbrance certificate</span><span>Optional</span></div>
+        </div>
+      </article>
+
+      <article class="step reveal">
+        <div>
+          <h3>Documents are checked automatically</h3>
+          <p>
+            Format, legibility, expiry dates, and whether the same file already
+            appears on another listing. Anything that fails is shown to the
+            seller with the reason, not hidden behind a status light.
+          </p>
+        </div>
+        <div class="step-detail">
+          <div class="row"><span>Format from file bytes</span><span>{% icon "check" "icon icon--sm gain" %}</span></div>
+          <div class="row"><span>Scan resolution</span><span>{% icon "check" "icon icon--sm gain" %}</span></div>
+          <div class="row"><span>Expiry parsing</span><span>{% icon "check" "icon icon--sm gain" %}</span></div>
+          <div class="row"><span>Reuse across listings</span><span>{% icon "check" "icon icon--sm gain" %}</span></div>
+        </div>
+      </article>
+
+      <article class="step reveal">
+        <div>
+          <h3>An independent valuation, with the working shown</h3>
+          <p>
+            Comparable listings are selected by size, location, configuration and
+            age, weighted by how closely they match, then adjusted for the ways
+            this property differs. The comparables and every adjustment appear on
+            the listing page.
+          </p>
+        </div>
+        <div class="step-detail">
+          <div class="row"><span>Method</span><span>Comparable sales</span></div>
+          <div class="row"><span>Comparables used</span><span>Up to 8</span></div>
+          <div class="row"><span>Output</span><span>Range, not a point</span></div>
+          <div class="row"><span>Decided by a model</span><span>No</span></div>
+        </div>
+      </article>
+
+      <article class="step reveal">
+        <div>
+          <h3>Buy the whole thing, or part of it</h3>
+          <p>
+            Make an offer and negotiate in a thread that both sides keep, or buy
+            shares in a property that has been opened to fractions. Holdings,
+            cost basis and payouts land in your portfolio.
+          </p>
+        </div>
+        <div class="step-detail">
+          <div class="row"><span>Offer window</span><span>7 days</span></div>
+          <div class="row"><span>Counter offers</span><span>Either side</span></div>
+          <div class="row"><span>Smallest fraction</span><span>1 share</span></div>
+          <div class="row"><span>Platform fee</span><span>0.5%</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% if movers %}
+<section class="page section">
+  <div class="split">
+    <div>
+      <h2>Priced against evidence, not a hunch</h2>
+      <p class="prose" style="margin-top: var(--s-3)">
+        Basix runs a comparable-sales valuation on every listing and keeps the
+        result. The listings below are the ones currently priced furthest below
+        their own estimate. Open any of them and the comparables that produced
+        the number are on the page.
+      </p>
+      <a class="btn btn--outline" style="margin-top: var(--s-5)"
+         href="{% url 'properties:index' %}?sort=value">
+        Sort the market by value
+        {% icon "arrow-right" "icon icon--sm" %}
+      </a>
+    </div>
+
+    <div class="panel">
+      {% for mover in movers %}
+        <div class="comp-row" style="padding-inline: var(--s-5); align-items: center">
+          <div>
+            <a href="{{ mover.listing.get_absolute_url }}" style="font-weight: 520">
+              {{ mover.listing.title }}
+            </a>
+            <div class="subtle" style="font-size: var(--text-xs)">
+              {{ mover.listing.location_label }}
+            </div>
+          </div>
+          <div style="text-align: right">
+            <div class="mono">{{ mover.listing.asking_price|money:currency }}</div>
+            <div class="mono {{ mover.gap|delta_class }}" style="font-size: var(--text-xs)">
+              {{ mover.gap|percent_signed }} vs estimate
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if cities %}
+<section class="page section">
+  <div class="section-head">
+    <h2>Where the listings are</h2>
+  </div>
+  <div class="chip-row">
+    {% for city in cities %}
+      <a class="chip" href="{% url 'properties:index' %}?city={{ city.city|urlencode }}">
+        {{ city.city }}
+        <span class="mono subtle">{{ city.count }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="page section">
+  <div class="band">
+    <div>
+      <h2>Start with one property</h2>
+      <p>
+        List what you own, or put a small amount into something someone else
+        owns. Both take about ten minutes, and both leave a record you can check
+        afterwards.
+      </p>
+      <div class="hero-actions" style="margin-top: var(--s-5)">
+        {% if user.is_authenticated %}
+          <a class="btn btn--solid" href="{% url 'properties:wizard' %}">List a property</a>
+          <a class="btn btn--outline" href="{% url 'properties:index' %}?fractional=on">Buy a fraction</a>
+        {% else %}
+          <a class="btn btn--solid" href="{% url 'accounts:sign_up' %}">Create an account</a>
+          <a class="btn btn--outline" href="{% url 'properties:index' %}">Look around first</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="band-figures">
+      <div>
+        <span class="k">Listings verified</span>
+        <span class="v">{{ stats.listing_count }}</span>
+      </div>
+      <div>
+        <span class="k">Average asking price</span>
+        <span class="v">{{ stats.average_price|money:currency }}</span>
+      </div>
+      <div>
+        <span class="k">Open to fractional purchase</span>
+        <span class="v">{{ stats.fractional_count }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

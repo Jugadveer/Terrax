@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+<div class="page page--narrow">
+  <header class="page-header">
+    <h1>Contact</h1>
+    <p>One form, read by a person. Tell us what you were doing when it went wrong.</p>
+  </header>
+
+  {% if sent %}
+    <div class="alert alert--success" style="margin-bottom: var(--s-5)">
+      {% icon "check-circle" "icon icon--sm" %}
+      <span>Message received. We reply by email, usually within a working day.</span>
+    </div>
+  {% endif %}
+
+  <form method="post" class="panel panel--pad stack" data-guard>
+    {% csrf_token %}
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.name %}
+      {% include "partials/field.html" with field=form.email %}
+      <div class="span-2">{% include "partials/field.html" with field=form.topic %}</div>
+      <div class="span-2">{% include "partials/field.html" with field=form.message %}</div>
+    </div>
+    <div class="row row--end">
+      <button type="submit" class="btn btn--solid">Send</button>
+    </div>
+  </form>
+
+  <div class="alert alert--info" style="margin-top: var(--s-5)">
+    {% icon "info" "icon icon--sm" %}
+    <span>
+      This build has no mail server attached. Messages are written to the
+      application log and confirmed in your notifications, rather than being
+      quietly discarded.
+    </span>
+  </div>
+</div>
+{% endblock %}

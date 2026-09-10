@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load basix humanize %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="row row--between" style="margin-bottom: var(--s-6); align-items: flex-start">
+    <div>
+      <h1 style="font-size: var(--text-2xl)">
+        {% firstof profile.display_name user.username %}
+      </h1>
+      <p class="muted" style="margin-top: var(--s-1)">What has changed since you were last here.</p>
+    </div>
+    <a class="btn btn--solid" href="{% url 'properties:wizard' %}">
+      {% icon "plus" "icon icon--sm" %} List a property
+    </a>
+  </header>
+
+  {% if show_onboarding %}
+    <section class="panel panel--pad" style="margin-bottom: var(--s-6)">
+      <div class="row row--between" style="margin-bottom: var(--s-4)">
+        <h2 style="font-size: var(--text-base)">Finish setting up</h2>
+        <form hx-post="{% url 'core:dismiss_onboarding' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--quiet btn--sm">Hide this</button>
+        </form>
+      </div>
+      <div class="grid grid--4">
+        {% for step in onboarding %}
+          <a class="panel panel--tight" href="{{ step.url }}"
+             style="display: flex; gap: var(--s-3); align-items: flex-start">
+            {% if step.done %}
+              {% icon "check-circle" "icon icon--sm gain" %}
+            {% else %}
+              {% icon "clock" "icon icon--sm subtle" %}
+            {% endif %}
+            <span>
+              <strong style="display: block; font-size: var(--text-sm)">{{ step.label }}</strong>
+              {% if step.note %}<span class="subtle" style="font-size: var(--text-xs)">{{ step.note }}</span>{% endif %}
+            </span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="stat-strip" style="margin-bottom: var(--s-6)">
+    <div class="stat">
+      <span class="k">Portfolio value</span>
+      <span class="v">{{ summary.portfolio_value|money:currency }}</span>
+      {% if summary.portfolio_value %}
+        <span class="delta {{ summary.portfolio_gain|delta_class }}">
+          {{ summary.portfolio_gain|money:currency }} ({{ summary.portfolio_gain_percent|percent_signed }})
+        </span>
+      {% else %}
+        <span class="delta subtle">No holdings yet</span>
+      {% endif %}
+    </div>
+    <div class="stat">
+      <span class="k">Live listings</span>
+      <span class="v">{{ summary.live_listings }}</span>
+      <span class="delta subtle">{{ summary.draft_listings }} draft{{ summary.draft_listings|pluralize }}</span>
+    </div>
+    <div class="stat">
+      <span class="k">Open offers</span>
+      <span class="v">{{ summary.open_offers }}</span>
+      <span class="delta subtle">{{ offer_counts.received }} to answer</span>
+    </div>
+    <div class="stat">
+      <span class="k">Payouts received</span>
+      <span class="v">{{ summary.payouts|money:currency }}</span>
+      <span class="delta subtle">{{ summary.watching }} on watchlist</span>
+    </div>
+  </div>
+
+  <div class="dash-layout">
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Activity</h3>
+        <a class="btn btn--quiet btn--sm" href="{% url 'accounts:notifications' %}">
+          All notifications {% icon "arrow-right" "icon icon--sm" %}
+        </a>
+      </div>
+
+      <div class="panel-body" style="padding-block: 0">
+        {% for entry in feed %}
+          <article class="feed-item">
+            <span class="dot {{ entry.tone }}">{% icon entry.icon "icon icon--sm" %}</span>
+            <div>
+              <h4><a href="{{ entry.url }}">{{ entry.title }}</a></h4>
+              <p>{{ entry.detail }}</p>
+            </div>
+            <div class="right">
+              {% if entry.amount %}<div>{{ entry.amount|money:currency }}</div>{% endif %}
+              <div>{{ entry.when|ago }}</div>
+            </div>
+          </article>
+        {% empty %}
+          <div class="empty">
+            {% icon "path" "icon" %}
+            <h3>Nothing has happened yet</h3>
+            <p>
+              Watch a property or make an offer, and changes to it will land
+              here. Listing something of your own does the same.
+            </p>
+            <div class="row" style="margin-top: var(--s-2)">
+              <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}">Browse the market</a>
+              <a class="btn btn--outline btn--sm" href="{% url 'properties:wizard' %}">List a property</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head"><h3>Priced below estimate</h3></div>
+        <div class="panel-body" style="padding-block: var(--s-2)">
+          {% for mover in movers %}
+            <div class="comp-row">
+              <div>
+                <a href="{{ mover.listing.get_absolute_url }}">{{ mover.listing.title|truncatechars:30 }}</a>
+                <div class="subtle" style="font-size: var(--text-xs)">{{ mover.listing.location_label }}</div>
+              </div>
+              <div style="text-align: right">
+                <div class="mono">{{ mover.listing.asking_price|money:currency }}</div>
+                <div class="weight {{ mover.gap|delta_class }}">{{ mover.gap|percent_signed }}</div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="subtle" style="font-size: var(--text-sm); padding: var(--s-3) 0">
+              Nothing valued yet.
+            </p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel--pad stack stack--tight">
+        <span class="label">Shortcuts</span>
+        <a class="row" href="{% url 'market:offers' %}">
+          {% icon "handshake" "icon icon--sm" %} Offers
+          <span class="spacer"></span>
+          <span class="mono subtle">{{ offer_counts.total }}</span>
+        </a>
+        <a class="row" href="{% url 'accounts:watchlist' %}">
+          {% icon "heart" "icon icon--sm" %} Watchlist
+          <span class="spacer"></span>
+          <span class="mono subtle">{{ summary.watching }}</span>
+        </a>
+        <a class="row" href="{% url 'accounts:saved_searches' %}">
+          {% icon "magnifying-glass" "icon icon--sm" %} Saved searches
+        </a>
+        <a class="row" href="{% url 'market:activity' %}">
+          {% icon "stack" "icon icon--sm" %} Transaction history
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

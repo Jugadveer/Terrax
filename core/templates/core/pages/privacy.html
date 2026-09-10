@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy{% endblock %}
+
+{% block content %}
+<div class="page page--narrow">
+  <header class="page-header">
+    <h1>Privacy</h1>
+    <p>What this build stores, where it stores it, and what it does not store.</p>
+  </header>
+
+  <div class="prose">
+    <h2>What is collected</h2>
+    <p>
+      An account holds a username, an email address, an optional mobile number,
+      and whatever you choose to put on your profile. Listings hold the property
+      details and files you upload. Offers hold the amounts and messages you
+      send. Watchlists and saved searches hold what you chose to save.
+    </p>
+
+    <h2>Identity documents</h2>
+    <p>
+      When you submit an identity document, the file is stored and only the last
+      four characters of the document number are kept alongside it. A full PAN or
+      Aadhaar number is never written to the database, so a database dump cannot
+      leak one.
+    </p>
+
+    <h2>Wallet addresses</h2>
+    <p>
+      A wallet address, if you connect one, is stored as a plain string. Basix
+      never asks for and never holds a private key or a seed phrase. No page on
+      this site will ever ask you for either.
+    </p>
+
+    <h2>What is not collected</h2>
+    <p>
+      No analytics scripts, no advertising trackers, no third party fonts, and
+      no third party stylesheets. The typeface and the icon set are served from
+      this domain. The only outbound request the site makes is to a language
+      model provider, and only when one has been configured by the operator.
+    </p>
+
+    <h2>Cookies</h2>
+    <p>
+      Two: a session cookie that keeps you signed in, and a CSRF token that
+      protects forms from being submitted by another site. Both are strictly
+      necessary, so there is no consent banner to dismiss. Your theme choice is
+      kept in local storage in your own browser.
+    </p>
+
+    <h2>Retention and deletion</h2>
+    <p>
+      Deleting a listing removes it and its files. There is no account deletion
+      flow in this build; to have an account removed, use the contact form.
+    </p>
+
+    <h2>This is a student project</h2>
+    <p>
+      Basix is a demonstration, not a licensed service. Do not upload a real
+      identity document, and do not reuse a password from another site.
+    </p>
+  </div>
+</div>
+{% endblock %}

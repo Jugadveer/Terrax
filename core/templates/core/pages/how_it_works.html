@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}How Basix works{% endblock %}
+{% block description %}The full path a property takes through Basix: documents, checks, valuation, risk score, offers and fractional ownership.{% endblock %}
+
+{% block content %}
+<div class="page">
+  <header class="page-header">
+    <h1>How it works</h1>
+    <p>
+      The whole path, with nothing hidden behind a status light. If a step
+      produces a number, this page says where the number comes from.
+    </p>
+  </header>
+
+  <div class="steps" style="margin-bottom: var(--s-9)">
+    <article class="step">
+      <div>
+        <h3>The seller puts the property on the record</h3>
+        <p>
+          Five steps: photographs, specification, documents, price, review. Each
+          step is validated on the server, so a listing cannot skip ahead with
+          half its fields empty. Drafts are saved as you go and can be picked up
+          later from the same place.
+        </p>
+      </div>
+      <div class="step-detail">
+        <div class="row"><span>Photographs</span><span>1 to 12</span></div>
+        <div class="row"><span>Required fields</span><span>6</span></div>
+        <div class="row"><span>Required documents</span><span>3</span></div>
+        <div class="row"><span>Draft expiry</span><span>None</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <h3>Documents are checked as they arrive</h3>
+        <p>
+          The file type is read from the leading bytes rather than the
+          extension. Scans below roughly 700 by 500 pixels are flagged as
+          unreadable. Expiry dates are parsed where the document has one. A
+          SHA-256 checksum catches the same file being reused on a second
+          listing.
+        </p>
+      </div>
+      <div class="step-detail">
+        <div class="row"><span>Format</span><span>PDF, JPEG, PNG</span></div>
+        <div class="row"><span>Maximum size</span><span>15 MB</span></div>
+        <div class="row"><span>Duplicate detection</span><span>SHA-256</span></div>
+        <div class="row"><span>Outcome</span><span>Shown to buyers</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <h3>An independent valuation is calculated</h3>
+        <p>
+          Comparable listings are chosen by property type, then locality, city
+          and state in turn. Each is scored on size, location, configuration,
+          age and how recently it was listed. Comparables from a different city
+          are rebased onto local rates before their price per square foot is
+          used. The weighted result is then adjusted for age, furnishing,
+          amenities, aspect, floor, title and carpet ratio.
+        </p>
+        <p style="margin-top: var(--s-3)">
+          <a href="{% url 'intelligence:status' %}" style="color: var(--accent-text)">
+            See the method in full, and what the language model does and does not do
+          </a>
+        </p>
+      </div>
+      <div class="step-detail">
+        <div class="row"><span>Method</span><span>Comparable sales</span></div>
+        <div class="row"><span>Comparables</span><span>3 to 8</span></div>
+        <div class="row"><span>Output</span><span>Range and confidence</span></div>
+        <div class="row"><span>Shown on the listing</span><span>Every comparable</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <h3>A risk score is produced from what can be checked</h3>
+        <p>
+          Seven weighted factors totalling one hundred: missing documents,
+          failed document checks, the seller's identity status, how far the
+          asking price sits above the valuation, how complete the listing record
+          is, the type of title, and how long it has been on the market. Every
+          factor that contributed is shown with its points and the reason it
+          fired.
+        </p>
+      </div>
+      <div class="step-detail">
+        <div class="row"><span>Documents missing</span><span>24 points</span></div>
+        <div class="row"><span>Seller identity</span><span>20 points</span></div>
+        <div class="row"><span>Price against valuation</span><span>16 points</span></div>
+        <div class="row"><span>Document checks</span><span>14 points</span></div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div>
+        <h3>Buyers offer, or buy a fraction</h3>
+        <p>
+          An offer opens a thread that both sides keep. Either side can counter,
+          which restarts the seven day window. Accepting one closes the rest,
+          and the buyers are told why. Where the seller has enabled fractional
+          ownership, shares can be bought from the unsold pool instead, and sold
+          back to it at the current share price.
+        </p>
+      </div>
+      <div class="step-detail">
+        <div class="row"><span>Offer window</span><span>7 days</span></div>
+        <div class="row"><span>Counter offers</span><span>Unlimited</span></div>
+        <div class="row"><span>Smallest position</span><span>1 share</span></div>
+        <div class="row"><span>Platform fee</span><span>0.5% on purchase</span></div>
+      </div>
+    </article>
+  </div>
+
+  <section class="section">
+    <div class="band">
+      <div>
+        <h2>What this build is, and is not</h2>
+        <p>
+          Basix is a working demonstration, not a licensed marketplace. Listings
+          and transactions are seeded data. Identity documents are reviewed by
+          hand rather than by a verification provider, and no money moves.
+        </p>
+      </div>
+      <div class="band-figures">
+        <div><span class="k">Valuations</span><span class="v">Deterministic</span></div>
+        <div><span class="k">Language model</span><span class="v">Explanation only</span></div>
+        <div><span class="k">Settlement</span><span class="v">Simulated</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
