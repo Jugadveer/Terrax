@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Saved searches{% endblock %}
+
+{% block content %}
+<div class="page page--narrow" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Saved searches</h1>
+    <p>
+      A saved search runs against every new listing. When one matches, it
+      appears on your dashboard rather than in your inbox.
+    </p>
+  </header>
+
+  <div class="stack">
+    {% for search in searches %}
+      <div class="panel panel--pad">
+        <div class="row row--between row--top">
+          <div>
+            <h3 style="font-size: var(--text-base)">{{ search.name }}</h3>
+            <div class="chip-row" style="margin-top: var(--s-2)">
+              {% for key, value in search.query.items %}
+                <span class="chip">{{ key|cut:"_"|title }}: {{ value }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <span class="badge badge--{% if search.alerts_enabled %}accent{% else %}neutral{% endif %}">
+            {% if search.alerts_enabled %}Alerts on{% else %}Alerts off{% endif %}
+          </span>
+        </div>
+
+        <div class="row" style="margin-top: var(--s-4)">
+          <a class="btn btn--outline btn--sm" href="{% url 'properties:index' %}?{{ search.query_string }}">
+            {% icon "magnifying-glass" "icon icon--sm" %} Run it now
+          </a>
+          <form method="post" action="{% url 'accounts:delete_saved_search' search.id %}"
+                data-confirm="Remove this saved search?">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--quiet btn--sm">Remove</button>
+          </form>
+          <span class="spacer"></span>
+          <span class="subtle mono" style="font-size: var(--text-xs)">
+            saved {{ search.created_at|ago }}
+          </span>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty panel">
+        {% icon "bookmark-simple" "icon" %}
+        <h3>No saved searches</h3>
+        <p>
+          Filter the marketplace to what you actually want, then use the Save
+          button above the results.
+        </p>
+        <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}">Go to the marketplace</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

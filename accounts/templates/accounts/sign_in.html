@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Sign in{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-form">
+    <h1 style="font-size: var(--text-2xl)">Sign in</h1>
+    <p class="muted" style="margin-top: var(--s-2); margin-bottom: var(--s-6)">
+      New here? <a href="{% url 'accounts:sign_up' %}" style="color: var(--accent-text)">Create an account</a>.
+    </p>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert--error" style="margin-bottom: var(--s-4)">
+        {% icon "warning" "icon icon--sm" %}
+        <span>{{ form.non_field_errors|join:" " }}</span>
+      </div>
+    {% endif %}
+
+    <form method="post" class="stack" data-guard>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+      {% include "partials/field.html" with field=form.username %}
+      {% include "partials/field.html" with field=form.password %}
+      <button type="submit" class="btn btn--solid btn--lg btn--block">Sign in</button>
+    </form>
+
+    <p class="subtle" style="font-size: var(--text-xs); margin-top: var(--s-5)">
+      This is a demonstration build. Do not use a password you use elsewhere.
+    </p>
+  </div>
+
+  <aside class="auth-aside">
+    <h2>Every listing here comes with its paperwork.</h2>
+    <div class="point">
+      {% icon "file-text" "icon icon--sm" %}
+      <span>Title deed, tax receipt and utility bill, checked automatically before the listing goes live.</span>
+    </div>
+    <div class="point">
+      {% icon "chart-line-up" "icon icon--sm" %}
+      <span>A comparable-sales valuation with the comparables and adjustments shown on the page.</span>
+    </div>
+    <div class="point">
+      {% icon "shield-check" "icon icon--sm" %}
+      <span>A risk score you can read factor by factor, not a badge with nothing behind it.</span>
+    </div>
+    <div class="point">
+      {% icon "coins" "icon icon--sm" %}
+      <span>Buy the whole property, or a share of one.</span>
+    </div>
+  </aside>
+</div>
+{% endblock %}

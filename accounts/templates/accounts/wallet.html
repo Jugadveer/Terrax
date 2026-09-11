@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Wallet{% endblock %}
+
+{% block content %}
+<div class="page page--narrow" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Wallet</h1>
+    <p>
+      Optional. A connected wallet is where settlement would go; nothing on
+      Basix requires one today.
+    </p>
+  </header>
+
+  <div class="stack stack--loose">
+    {% if profile.wallet_address %}
+      <div class="panel panel--pad">
+        <span class="label">Connected address</span>
+        <div class="row row--between" style="margin-top: var(--s-3)">
+          <span class="mono" style="font-size: var(--text-md); word-break: break-all">
+            {{ profile.wallet_address }}
+          </span>
+          <button type="button" class="icon-chip" data-copy="{{ profile.wallet_address }}"
+                  aria-label="Copy address">
+            {% icon "copy" "icon icon--sm" %}
+          </button>
+        </div>
+
+        <div class="alert alert--warning" style="margin-top: var(--s-4)">
+          {% icon "warning" "icon icon--sm" %}
+          <span>
+            This address is recorded but not proved. Proving it needs a signed
+            challenge, so the interface says unverified rather than implying
+            otherwise.
+          </span>
+        </div>
+
+        <form method="post" action="{% url 'accounts:disconnect_wallet' %}"
+              style="margin-top: var(--s-4)" data-confirm="Disconnect this wallet?">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--danger btn--sm">Disconnect</button>
+        </form>
+      </div>
+    {% endif %}
+
+    <form method="post" class="panel panel--pad stack" data-guard>
+      {% csrf_token %}
+      <h2 style="font-size: var(--text-lg)">
+        {% if profile.wallet_address %}Replace the address{% else %}Connect a wallet{% endif %}
+      </h2>
+
+      <button type="button" class="btn btn--outline btn--block" id="connect-metamask">
+        {% icon "wallet" "icon icon--sm" %} Connect with MetaMask
+      </button>
+      <p class="field-hint" id="wallet-status"></p>
+
+      <div class="row" style="gap: var(--s-3); align-items: center">
+        <span class="spacer" style="height: 1px; background: var(--line)"></span>
+        <span class="subtle" style="font-size: var(--text-xs)">or paste it</span>
+        <span class="spacer" style="height: 1px; background: var(--line)"></span>
+      </div>
+
+      {% include "partials/field.html" with field=form.wallet_address %}
+
+      <div class="row row--end">
+        <button type="submit" class="btn btn--solid">Save address</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("connect-metamask")?.addEventListener("click", async () => {
+    const status = document.getElementById("wallet-status");
+    if (typeof window.ethereum === "undefined") {
+      status.textContent =
+        "No wallet extension found in this browser. Paste the address instead.";
+      return;
+    }
+    try {
+      const [account] = await window.ethereum.request({ method: "eth_requestAccounts" });
+      document.getElementById("{{ form.wallet_address.id_for_label }}").value = account;
+      status.textContent = "Address filled in. Save it to finish.";
+    } catch (error) {
+      status.textContent = "The wallet declined the request.";
+    }
+  });
+</script>
+{% endblock %}

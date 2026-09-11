@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Watchlist{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Watchlist</h1>
+    <p>Price movement since you added each one.</p>
+  </header>
+
+  <div class="stack">
+    {% for row in rows %}
+      <article class="listing-card listing-card--row">
+        <div class="listing-media">
+          {% with cover=row.listing.cover_image %}
+            {% if cover %}
+              <img src="{{ cover.display_url }}" alt="{{ row.listing.title }}" width="260" height="176" loading="lazy">
+            {% else %}
+              <div class="placeholder">{% icon "image" "icon icon--lg" %}</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="listing-body">
+          <div class="row row--between row--top">
+            <div>
+              <h3><a href="{{ row.listing.get_absolute_url }}">{{ row.listing.title }}</a></h3>
+              <p class="listing-meta" style="margin-top: var(--s-1)">
+                {% icon "map-pin" "icon icon--sm" %} {{ row.listing.location_label }}
+              </p>
+            </div>
+            <span class="badge badge--{{ row.listing.status_tone }}">{{ row.listing.get_status_display }}</span>
+          </div>
+
+          <div class="kv" style="margin-top: var(--s-3)">
+            <div>
+              <span class="k">Asking now</span>
+              <span class="v mono">{{ row.listing.asking_price|money:currency }}</span>
+            </div>
+            <div>
+              <span class="k">When you added it</span>
+              <span class="v mono">{{ row.item.price_at_add|money:currency }}</span>
+            </div>
+            <div>
+              <span class="k">Change</span>
+              <span class="v mono {{ row.change|delta_class }}">
+                {% if row.change %}{{ row.change|percent_signed }}{% else %}No change{% endif %}
+              </span>
+            </div>
+            <div>
+              <span class="k">Watching since</span>
+              <span class="v">{{ row.item.created_at|ago }}</span>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: var(--s-4)">
+            <a class="btn btn--outline btn--sm" href="{{ row.listing.get_absolute_url }}">Open listing</a>
+            <form method="post" action="{% url 'properties:watch' row.listing.public_id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--quiet btn--sm">Stop watching</button>
+            </form>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty panel">
+        {% icon "heart" "icon" %}
+        <h3>Nothing on the watchlist</h3>
+        <p>
+          The heart on any listing adds it here, and the dashboard then tells
+          you when its price moves.
+        </p>
+        <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}">Browse the market</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

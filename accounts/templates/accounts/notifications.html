@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="page page--narrow" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="row row--between" style="margin-bottom: var(--s-5)">
+    <div>
+      <h1 style="font-size: var(--text-2xl)">Notifications</h1>
+      <p class="muted" style="margin-top: var(--s-1)">
+        {% if unread_notifications %}{{ unread_notifications }} unread{% else %}All caught up{% endif %}
+      </p>
+    </div>
+    {% if unread_notifications %}
+      <form method="post" action="{% url 'accounts:read_notifications' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--outline btn--sm">Mark all read</button>
+      </form>
+    {% endif %}
+  </header>
+
+  <div class="panel">
+    <div class="panel-body" style="padding-block: 0">
+      {% for notification in notifications %}
+        <article class="feed-item">
+          <span class="dot {% if notification.is_read %}{% else %}accent{% endif %}">
+            {% icon notification.icon "icon icon--sm" %}
+          </span>
+          <div>
+            <h4>
+              {% if notification.url %}
+                <a href="{{ notification.url }}">{{ notification.title }}</a>
+              {% else %}
+                {{ notification.title }}
+              {% endif %}
+            </h4>
+            {% if notification.body %}<p>{{ notification.body }}</p>{% endif %}
+          </div>
+          <div class="right">{{ notification.created_at|ago }}</div>
+        </article>
+      {% empty %}
+        <div class="empty">
+          {% icon "bell" "icon" %}
+          <h3>Nothing yet</h3>
+          <p>
+            Offers, price movements on properties you watch, and matches for a
+            saved search all land here.
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <p class="subtle" style="font-size: var(--text-xs); margin-top: var(--s-4)">
+    What arrives here is controlled in
+    <a href="{% url 'accounts:settings' %}">settings</a>.
+  </p>
+</div>
+{% endblock %}

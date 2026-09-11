@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Create an account{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-form">
+    <h1 style="font-size: var(--text-2xl)">Create an account</h1>
+    <p class="muted" style="margin-top: var(--s-2); margin-bottom: var(--s-6)">
+      Already have one? <a href="{% url 'accounts:login' %}" style="color: var(--accent-text)">Sign in</a>.
+    </p>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert--error" style="margin-bottom: var(--s-4)">
+        {% icon "warning" "icon icon--sm" %}
+        <span>{{ form.non_field_errors|join:" " }}</span>
+      </div>
+    {% endif %}
+
+    <form method="post" class="stack" data-guard>
+      {% csrf_token %}
+      {% include "partials/field.html" with field=form.display_name %}
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.username %}
+        {% include "partials/field.html" with field=form.phone %}
+      </div>
+      {% include "partials/field.html" with field=form.email %}
+      {% include "partials/field.html" with field=form.password1 %}
+      {% include "partials/field.html" with field=form.password2 %}
+      <button type="submit" class="btn btn--solid btn--lg btn--block">Create account</button>
+    </form>
+
+    <p class="subtle" style="font-size: var(--text-xs); margin-top: var(--s-5)">
+      By creating an account you accept the
+      <a href="{% url 'core:terms' %}">terms</a> and the
+      <a href="{% url 'core:privacy' %}">privacy notice</a>. Identity
+      verification comes later, and only when you list or buy.
+    </p>
+  </div>
+
+  <aside class="auth-aside">
+    <h2>Buying property should not require trusting a stranger.</h2>
+    <div class="point">
+      {% icon "seal-check" "icon icon--sm" %}
+      <span>Sellers verify their identity before a listing can go live.</span>
+    </div>
+    <div class="point">
+      {% icon "file-text" "icon icon--sm" %}
+      <span>Documents are checked on upload, and the result is shown to buyers.</span>
+    </div>
+    <div class="point">
+      {% icon "scales" "icon icon--sm" %}
+      <span>Compare up to four properties against their own valuations.</span>
+    </div>
+    <div class="point">
+      {% icon "bell" "icon icon--sm" %}
+      <span>Save a search and hear about new matches, not about everything.</span>
+    </div>
+  </aside>
+</div>
+{% endblock %}

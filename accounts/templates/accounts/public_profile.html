@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}{{ seller.name }} on Basix{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="panel panel--pad" style="margin-bottom: var(--s-6)">
+    <div class="row row--top" style="gap: var(--s-5)">
+      {% if seller.avatar %}
+        <img class="avatar avatar--lg" src="{{ seller.avatar.url }}" alt="" width="52" height="52">
+      {% else %}
+        <span class="avatar avatar--lg">{{ seller.name|initials }}</span>
+      {% endif %}
+
+      <div style="flex: 1">
+        <h1 style="font-size: var(--text-xl)">{{ seller.name }}</h1>
+        {% if seller.headline %}
+          <p class="muted" style="margin-top: var(--s-1)">{{ seller.headline }}</p>
+        {% endif %}
+        <div class="row row--wrap" style="margin-top: var(--s-3)">
+          <span class="badge badge--{{ seller.kyc_tone }}">
+            {% if seller.is_kyc_verified %}
+              {% icon "seal-check" "icon icon--sm" %} Identity verified
+            {% else %}
+              Identity {{ seller.get_kyc_status_display|lower }}
+            {% endif %}
+          </span>
+          {% if seller.city %}
+            <span class="badge badge--outline">{% icon "map-pin" "icon icon--sm" %} {{ seller.city }}</span>
+          {% endif %}
+          <span class="badge badge--outline">
+            {{ listing_count }} listing{{ listing_count|pluralize }}
+          </span>
+          <span class="badge badge--outline">Joined {{ seller.created_at|date:"M Y" }}</span>
+        </div>
+      </div>
+    </div>
+
+    {% if seller.bio %}
+      <p class="prose" style="margin-top: var(--s-5); font-size: var(--text-sm)">{{ seller.bio }}</p>
+    {% endif %}
+  </header>
+
+  <div class="section-head">
+    <h2>On the market</h2>
+  </div>
+
+  {% if listings %}
+    <div class="card-grid">
+      {% for listing in listings %}
+        {% include "partials/listing_card.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty panel">
+      {% icon "house-line" "icon" %}
+      <h3>Nothing listed right now</h3>
+      <p>This seller has no properties on the market at the moment.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Identity verification{% endblock %}
+
+{% block content %}
+<div class="page page--narrow" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Identity</h1>
+    <p>
+      Required before you can list a property or buy shares. Buyers see whether
+      a seller is verified, which is most of what the status is for.
+    </p>
+  </header>
+
+  <div class="stack stack--loose">
+    <div class="panel panel--pad">
+      <div class="row row--between">
+        <div>
+          <span class="label">Current status</span>
+          <div style="margin-top: var(--s-2)">
+            <span class="badge badge--{{ profile.kyc_tone }}">{{ profile.get_kyc_status_display }}</span>
+          </div>
+        </div>
+        {% if profile.kyc_reviewed_at %}
+          <span class="subtle mono" style="font-size: var(--text-xs)">
+            Reviewed {{ profile.kyc_reviewed_at|ago }}
+          </span>
+        {% endif %}
+      </div>
+      {% if profile.kyc_notes %}
+        <p class="alert alert--warning" style="margin-top: var(--s-4)">
+          {% icon "warning" "icon icon--sm" %}
+          <span>{{ profile.kyc_notes }}</span>
+        </p>
+      {% endif %}
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="panel panel--pad stack" data-guard>
+      {% csrf_token %}
+      <div>
+        <h2 style="font-size: var(--text-lg)">Add a document</h2>
+        <p class="muted" style="font-size: var(--text-sm); margin-top: var(--s-1)">
+          A PAN card, Aadhaar, passport or driving licence. Only the last four
+          characters of the number are stored, so the full identifier is never
+          written to the database.
+        </p>
+      </div>
+
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.kind %}
+        {% include "partials/field.html" with field=form.number %}
+      </div>
+
+      <label class="dropzone" data-dropzone>
+        {% icon "identification-card" "icon icon--lg" %}
+        <strong>Drop a scan here, or choose a file</strong>
+        <span>PDF, JPEG or PNG, up to 15 MB</span>
+        {{ form.file }}
+      </label>
+      <div data-file-list class="file-list"></div>
+      {% for error in form.file.errors %}
+        <span class="field-error" role="alert">{{ error }}</span>
+      {% endfor %}
+
+      <div class="row row--end">
+        <button type="submit" class="btn btn--solid">Submit for verification</button>
+      </div>
+    </form>
+
+    {% if documents %}
+      <section class="panel">
+        <div class="panel-head"><h3>Submitted</h3></div>
+        <div class="panel-body stack stack--tight">
+          {% for document in documents %}
+            <div class="row row--between">
+              <span>
+                {% icon "file-text" "icon icon--sm" %}
+                {{ document.get_kind_display }}
+                <span class="subtle mono" style="font-size: var(--text-xs)">
+                  ending {{ document.number_last4 }}
+                </span>
+              </span>
+              <span class="subtle" style="font-size: var(--text-xs)">{{ document.uploaded_at|ago }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    <div class="alert alert--info">
+      {% icon "info" "icon icon--sm" %}
+      <span>
+        This is a demonstration build. Documents are stored locally and reviewed
+        by hand rather than sent to a verification provider.
+      </span>
+    </div>
+  </div>
+</div>
+{% endblock %}

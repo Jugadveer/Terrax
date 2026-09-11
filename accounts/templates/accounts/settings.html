@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="page page--narrow" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Settings</h1>
+    <p>How you appear to buyers, and what the site tells you about.</p>
+  </header>
+
+  <div class="stack stack--loose">
+    <form method="post" enctype="multipart/form-data" class="panel panel--pad stack" data-guard>
+      {% csrf_token %}
+      <h2 style="font-size: var(--text-lg)">Profile</h2>
+
+      <div class="row">
+        {% if profile.avatar %}
+          <img class="avatar avatar--lg" src="{{ profile.avatar.url }}" alt="" width="52" height="52">
+        {% else %}
+          <span class="avatar avatar--lg">{{ profile.name|initials }}</span>
+        {% endif %}
+        <div style="flex: 1">{% include "partials/field.html" with field=form.avatar %}</div>
+      </div>
+
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.display_name %}
+        {% include "partials/field.html" with field=form.phone %}
+        <div class="span-2">{% include "partials/field.html" with field=form.headline %}</div>
+        <div class="span-2">{% include "partials/field.html" with field=form.bio %}</div>
+        {% include "partials/field.html" with field=form.city %}
+      </div>
+
+      <h2 style="font-size: var(--text-lg); margin-top: var(--s-4)">Display</h2>
+      <div class="form-grid">
+        {% include "partials/field.html" with field=form.currency %}
+        {% include "partials/field.html" with field=form.theme %}
+      </div>
+
+      <div class="row row--end">
+        <button type="submit" class="btn btn--solid">Save profile</button>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'accounts:save_preferences' %}" class="panel panel--pad stack">
+      {% csrf_token %}
+      <div>
+        <h2 style="font-size: var(--text-lg)">Notifications</h2>
+        <p class="muted" style="font-size: var(--text-sm); margin-top: var(--s-1)">
+          Turning one off stops it being created, not just hidden.
+        </p>
+      </div>
+      {% for field in preferences %}
+        {% include "partials/field.html" with field=field %}
+      {% endfor %}
+      <div class="row row--end">
+        <button type="submit" class="btn btn--outline">Save preferences</button>
+      </div>
+    </form>
+
+    <div class="panel panel--pad stack stack--tight">
+      <h2 style="font-size: var(--text-lg)">Account</h2>
+      <div class="row row--between">
+        <span class="muted">Username</span>
+        <span class="mono">{{ user.username }}</span>
+      </div>
+      <div class="row row--between">
+        <span class="muted">Email</span>
+        <span class="mono">{{ user.email }}</span>
+      </div>
+      <div class="row row--between">
+        <span class="muted">Identity</span>
+        <span class="badge badge--{{ profile.kyc_tone }}">{{ profile.get_kyc_status_display }}</span>
+      </div>
+      <div class="row row--between">
+        <span class="muted">Wallet</span>
+        <span class="mono">{{ profile.wallet_short|default:"Not connected" }}</span>
+      </div>
+      <div class="row row--between">
+        <span class="muted">Public profile</span>
+        <a class="mono" href="{{ profile.get_absolute_url }}">View as a buyer</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

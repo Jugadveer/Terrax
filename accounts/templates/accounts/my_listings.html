@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}My listings{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="row row--between" style="margin-bottom: var(--s-5); align-items: flex-start">
+    <div>
+      <h1 style="font-size: var(--text-2xl)">My listings</h1>
+      <p class="muted" style="margin-top: var(--s-1)">
+        Drafts, listings under review, and everything live.
+      </p>
+    </div>
+    <a class="btn btn--solid" href="{% url 'properties:wizard' %}">
+      {% icon "plus" "icon icon--sm" %} List a property
+    </a>
+  </header>
+
+  <nav class="tabs" style="margin-bottom: var(--s-5)">
+    <a class="tab {% if not active_status %}is-active{% endif %}" href="{% url 'accounts:my_listings' %}">
+      All <span class="count">{{ counts.all }}</span>
+    </a>
+    <a class="tab {% if active_status == 'draft' %}is-active{% endif %}" href="?status=draft">
+      Drafts <span class="count">{{ counts.draft|default:0 }}</span>
+    </a>
+    <a class="tab {% if active_status == 'submitted' %}is-active{% endif %}" href="?status=submitted">
+      Submitted <span class="count">{{ counts.submitted|default:0 }}</span>
+    </a>
+    <a class="tab {% if active_status == 'listed' %}is-active{% endif %}" href="?status=listed">
+      Live <span class="count">{{ counts.listed|default:0 }}</span>
+    </a>
+    <a class="tab {% if active_status == 'under_offer' %}is-active{% endif %}" href="?status=under_offer">
+      Under offer <span class="count">{{ counts.under_offer|default:0 }}</span>
+    </a>
+  </nav>
+
+  <div class="stack">
+    {% for listing in listings %}
+      <article class="listing-card listing-card--row">
+        <div class="listing-media">
+          {% with cover=listing.cover_image %}
+            {% if cover %}
+              <img src="{{ cover.display_url }}" alt="{{ listing.title }}" width="260" height="176" loading="lazy">
+            {% else %}
+              <div class="placeholder">{% icon "image" "icon icon--lg" %}</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="listing-body">
+          <div class="row row--between row--top">
+            <div>
+              <h3>
+                <a href="{% if listing.is_public %}{{ listing.get_absolute_url }}{% else %}{% url 'properties:wizard_step' listing.public_id listing.wizard_step %}{% endif %}">
+                  {{ listing.title|default:"Untitled draft" }}
+                </a>
+              </h3>
+              <p class="listing-meta" style="margin-top: var(--s-1)">
+                {% icon "map-pin" "icon icon--sm" %} {{ listing.location_label }}
+              </p>
+            </div>
+            <span class="badge badge--{{ listing.status_tone }}">{{ listing.get_status_display }}</span>
+          </div>
+
+          <div class="kv" style="margin-top: var(--s-3)">
+            <div><span class="k">Asking</span><span class="v mono">{{ listing.asking_price|money:currency }}</span></div>
+            <div><span class="k">Views</span><span class="v mono">{{ listing.view_count }}</span></div>
+            <div><span class="k">Offers</span><span class="v mono">{{ listing.offers.count }}</span></div>
+            <div><span class="k">Updated</span><span class="v">{{ listing.updated_at|ago }}</span></div>
+          </div>
+
+          {% if listing.status == "draft" %}
+            <div style="margin-top: var(--s-3)">
+              <div class="row row--between" style="font-size: var(--text-xs); margin-bottom: 4px">
+                <span class="subtle">Step {{ listing.wizard_step }} of 5</span>
+              </div>
+              <div class="meter"><span style="width: {% widthratio listing.wizard_step 5 100 %}%"></span></div>
+            </div>
+          {% endif %}
+
+          <div class="row" style="margin-top: var(--s-4)">
+            {% if listing.is_editable %}
+              <a class="btn btn--outline btn--sm"
+                 href="{% url 'properties:wizard_step' listing.public_id listing.wizard_step %}">
+                {% icon "pencil-simple" "icon icon--sm" %}
+                {% if listing.status == "draft" %}Continue{% else %}Edit{% endif %}
+              </a>
+              <form method="post" action="{% url 'properties:delete' listing.public_id %}"
+                    data-confirm="Delete this listing? This cannot be undone.">
+                {% csrf_token %}
+                <button type="submit" class="btn btn--danger btn--sm">Delete</button>
+              </form>
+            {% endif %}
+            {% if listing.is_public %}
+              <a class="btn btn--quiet btn--sm" href="{{ listing.get_absolute_url }}">
+                View as a buyer {% icon "arrow-up-right" "icon icon--sm" %}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty panel">
+        {% icon "house-line" "icon" %}
+        <h3>You have not listed anything yet</h3>
+        <p>
+          The wizard takes about ten minutes: photographs, the specification,
+          three documents, and a price. It saves as you go.
+        </p>
+        <a class="btn btn--solid btn--sm" href="{% url 'properties:wizard' %}">Start a listing</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
