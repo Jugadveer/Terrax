@@ -1,0 +1,82 @@
+{% load basix humanize %}
+<div class="stack stack--loose">
+  <section class="panel panel--pad">
+    <h2 style="font-size: var(--text-lg); margin-bottom: var(--s-4)">Before it goes for review</h2>
+    <ul class="checklist">
+      {% for label, done in readiness.items %}
+        <li>
+          {% if done %}
+            {% icon "check-circle" "icon icon--sm is-done" %}
+            <span>{{ label }}</span>
+          {% else %}
+            {% icon "warning-circle" "icon icon--sm is-todo" %}
+            <span class="subtle">{{ label }}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h3>How it will appear</h3></div>
+    <div class="panel-body">
+      <div style="max-width: 340px">
+        {% include "partials/listing_card.html" %}
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h3>Everything on the record</h3></div>
+    <div class="panel-body">
+      <div class="kv">
+        <div><span class="k">Title</span><span class="v">{{ listing.title|default:"Not set" }}</span></div>
+        <div><span class="k">Type</span><span class="v">{{ listing.get_property_type_display|default:"Not set" }}</span></div>
+        <div><span class="k">Location</span><span class="v">{{ listing.location_label }}</span></div>
+        <div><span class="k">Built-up area</span><span class="v mono">{% if listing.area_sqft %}{{ listing.area_sqft|floatformat:0|intcomma }} sq ft{% else %}Not set{% endif %}</span></div>
+        <div><span class="k">Bedrooms</span><span class="v mono">{{ listing.bedrooms|default:"-" }}</span></div>
+        <div><span class="k">Year built</span><span class="v mono">{{ listing.year_built|default:"-" }}</span></div>
+        <div><span class="k">Ownership</span><span class="v">{{ listing.get_ownership_type_display|default:"Not set" }}</span></div>
+        <div><span class="k">Asking price</span><span class="v mono">{{ listing.asking_price|money }}</span></div>
+        <div><span class="k">Photographs</span><span class="v mono">{{ images|length }}</span></div>
+        <div><span class="k">Documents</span><span class="v mono">{{ documents|length }}</span></div>
+        <div><span class="k">Fractional</span><span class="v">{% if listing.fractional_enabled %}{{ listing.total_shares|intcomma }} shares{% else %}Sold whole{% endif %}</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel panel--pad stack">
+    <h3 style="font-size: var(--text-base)">What happens next</h3>
+    <p class="muted" style="font-size: var(--text-sm)">
+      Submitting runs the document checks, produces a comparable-sales valuation
+      and a risk score, and puts the listing in the review queue. You can see all
+      three on the listing page straight afterwards.
+    </p>
+
+    {% if ready %}
+      <form method="post" action="{% url 'properties:submit' listing.public_id %}" data-guard>
+        {% csrf_token %}
+        <button type="submit" class="btn btn--solid btn--lg btn--block">
+          {% icon "paper-plane-tilt" "icon icon--sm" %} Submit for review
+        </button>
+      </form>
+    {% else %}
+      <div class="alert alert--warning">
+        {% icon "warning" "icon icon--sm" %}
+        <span>Finish the unticked items above before submitting.</span>
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'properties:delete' listing.public_id %}"
+          data-confirm="Delete this draft? This cannot be undone.">
+      {% csrf_token %}
+      <button type="submit" class="btn btn--danger btn--sm btn--block">Delete this draft</button>
+    </form>
+  </section>
+
+  <div class="row">
+    <a class="btn btn--quiet" href="{% url 'properties:wizard_step' listing.public_id 4 %}">
+      {% icon "arrow-left" "icon icon--sm" %} Back to pricing
+    </a>
+  </div>
+</div>

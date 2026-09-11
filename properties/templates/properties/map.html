@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static basix %}
+
+{% block title %}Map, {{ count }} properties{% endblock %}
+
+{% block head %}
+{% comment %}
+  Leaflet with OpenStreetMap tiles: no API key and no account. Served from this
+  domain, and only on this page, so no other page pays for it.
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-5) var(--s-7)">
+  <div class="row row--between" style="margin-bottom: var(--s-4); flex-wrap: wrap">
+    <div>
+      <h1 style="font-size: var(--text-xl)">Map</h1>
+      <p class="muted" style="font-size: var(--text-sm)">
+        {{ count }} propert{{ count|pluralize:"y,ies" }} with a recorded location.
+      </p>
+    </div>
+    <a class="btn btn--outline btn--sm" href="{% url 'properties:index' %}?{{ request.GET.urlencode }}">
+      {% icon "squares-four" "icon icon--sm" %} Back to the grid
+    </a>
+  </div>
+
+  <div id="map" data-geojson="{{ geojson }}"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script>
+  (function () {
+    const element = document.getElementById("map");
+    const data = JSON.parse(element.dataset.geojson);
+
+    const map = L.map(element, { scrollWheelZoom: false }).setView([20.8, 78.5], 5);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    const rupees = (value) => {
+      if (value >= 10000000) return "₹" + (value / 10000000).toFixed(2).replace(/\.?0+$/, "") + " Cr";
+      if (value >= 100000) return "₹" + (value / 100000).toFixed(1).replace(/\.0$/, "") + " L";
+      return "₹" + value.toLocaleString("en-IN");
+    };
+
+    const markers = data.features.map((feature) => {
+      const [lng, lat] = feature.geometry.coordinates;
+      const p = feature.properties;
+      // A price label reads at a glance; a generic pin does not.
+      const marker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: "",
+          html: `<span class="map-pin">${rupees(p.price)}</span>`,
+          iconSize: [0, 0],
+        }),
+      });
+      marker.bindPopup(
+        `<a class="map-card" href="${p.url}">
+           ${p.image ? `<img src="${p.image}" alt="">` : ""}
+           <strong>${p.title}</strong>
+           <span>${p.location}</span>
+           <span>${p.spec}</span>
+           <b>${rupees(p.price)}</b>
+         </a>`
+      );
+      return marker;
+    });
+
+    if (markers.length) {
+      const group = L.featureGroup(markers).addTo(map);
+      map.fitBounds(group.getBounds().pad(0.15));
+    }
+  })();
+</script>
+
+<style>
+  .map-pin {
+    display: inline-block;
+    transform: translate(-50%, -100%);
+    padding: 3px 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    border-radius: var(--r-full);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: var(--shadow-2);
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: var(--r-md);
+    padding: 0;
+    overflow: hidden;
+  }
+  .leaflet-popup-content { margin: 0; width: 220px !important; }
+  .map-card { display: block; padding: 0 0 10px; color: var(--stone-900); }
+  .map-card img { width: 100%; height: 110px; object-fit: cover; margin-bottom: 8px; }
+  .map-card strong { display: block; padding: 0 12px; font-size: 13px; }
+  .map-card span { display: block; padding: 0 12px; font-size: 11px; color: var(--stone-500); }
+  .map-card b { display: block; padding: 6px 12px 0; font-family: var(--font-mono); }
+</style>
+{% endblock %}

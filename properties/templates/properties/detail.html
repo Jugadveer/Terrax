@@ -1,0 +1,681 @@
+{% extends "base.html" %}
+{% load static basix humanize %}
+
+{% block title %}{{ listing.title }}, {{ listing.location_label }}{% endblock %}
+{% block description %}{{ listing.summary|default:listing.description|truncatewords:28 }}{% endblock %}
+{% block og_title %}{{ listing.title }}{% endblock %}
+{% block og_description %}{{ listing.summary }}{% endblock %}
+{% block og_image %}{% if listing.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ listing.cover_image.display_url }}{% else %}{% static 'img/og.png' %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-top: var(--s-5)">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="{% url 'properties:index' %}">Marketplace</a>
+    <span class="sep">/</span>
+    {% if listing.city %}
+      <a href="{% url 'properties:index' %}?city={{ listing.city|urlencode }}">{{ listing.city }}</a>
+      <span class="sep">/</span>
+    {% endif %}
+    <span>{{ listing.title|truncatechars:40 }}</span>
+  </nav>
+
+  <div class="row row--between" style="margin: var(--s-4) 0 var(--s-5); align-items: flex-start">
+    <div>
+      <div class="row row--wrap" style="margin-bottom: var(--s-2)">
+        <span class="badge badge--{{ listing.status_tone }}">{{ listing.get_status_display }}</span>
+        {% if listing.fractional_enabled %}
+          <span class="badge badge--outline">{% icon "coins" "icon icon--sm" %} Fractional</span>
+        {% endif %}
+        {% if listing.token %}
+          <span class="badge badge--outline mono">{{ listing.token.token_id }}</span>
+        {% endif %}
+      </div>
+      <h1 style="font-size: var(--text-2xl)">{{ listing.title }}</h1>
+      <p class="row muted" style="margin-top: var(--s-2); font-size: var(--text-sm)">
+        {% icon "map-pin" "icon icon--sm" %} {{ listing.location_label }}
+        {% if listing.pincode %}<span class="mono subtle">{{ listing.pincode }}</span>{% endif %}
+      </p>
+    </div>
+
+    <div class="row">
+      {% if user.is_authenticated %}
+        {% include "properties/partials/watch_button.html" %}
+      {% endif %}
+      <button type="button" class="icon-chip" data-compare="{{ listing.public_id }}"
+              aria-pressed="false" aria-label="Add to comparison">
+        {% icon "scales" "icon icon--sm" %}
+      </button>
+      <button type="button" class="icon-chip"
+              data-copy="{{ request.scheme }}://{{ request.get_host }}{{ listing.get_absolute_url }}"
+              aria-label="Copy link">
+        {% icon "link-simple" "icon icon--sm" %}
+      </button>
+      {% if is_owner %}
+        <a class="btn btn--outline btn--sm" href="{% url 'properties:wizard_step' listing.public_id 2 %}">
+          {% icon "pencil-simple" "icon icon--sm" %} Edit
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="detail-layout">
+    <div class="stack stack--loose">
+
+      {# --- Gallery ------------------------------------------------------ #}
+      <section data-gallery>
+        <div class="gallery-main">
+          {% with cover=listing.cover_image %}
+            {% if cover %}
+              <img data-gallery-main src="{{ cover.image.url }}" width="1200" height="750"
+                   alt="{{ cover.alt_text|default:listing.title }}" fetchpriority="high">
+            {% else %}
+              <div class="placeholder" style="display:grid;place-items:center;height:100%">
+                {% icon "image" "icon icon--lg" %}
+              </div>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        {% if listing.images.count > 1 %}
+          <div class="gallery-thumbs">
+            {% for image in listing.images.all %}
+              <img data-gallery-thumb data-full="{{ image.image.url }}" src="{{ image.display_url }}"
+                   alt="{{ image.alt_text|default:listing.title }}" width="92" height="66"
+                   loading="lazy" aria-current="{% if image.is_cover %}true{% else %}false{% endif %}"
+                   tabindex="0" role="button">
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+
+      {# --- Key facts ---------------------------------------------------- #}
+      <section>
+        <div class="fact-grid">
+          {% if listing.area_sqft %}
+            <div><span class="k">Built-up area</span><span class="v mono">{{ listing.area_sqft|floatformat:0|intcomma }} sq ft</span></div>
+          {% endif %}
+          {% if listing.carpet_area_sqft %}
+            <div><span class="k">Carpet area</span><span class="v mono">{{ listing.carpet_area_sqft|floatformat:0|intcomma }} sq ft</span></div>
+          {% endif %}
+          {% if listing.bedrooms %}
+            <div><span class="k">Bedrooms</span><span class="v mono">{{ listing.bedrooms }}</span></div>
+          {% endif %}
+          {% if listing.bathrooms %}
+            <div><span class="k">Bathrooms</span><span class="v mono">{{ listing.bathrooms }}</span></div>
+          {% endif %}
+          {% if listing.year_built %}
+            <div><span class="k">Built</span><span class="v mono">{{ listing.year_built }}</span></div>
+          {% endif %}
+          {% if listing.floor is not None and listing.total_floors %}
+            <div><span class="k">Floor</span><span class="v mono">{{ listing.floor }} of {{ listing.total_floors }}</span></div>
+          {% endif %}
+          {% if listing.facing %}
+            <div><span class="k">Facing</span><span class="v">{{ listing.get_facing_display }}</span></div>
+          {% endif %}
+          {% if listing.furnishing %}
+            <div><span class="k">Furnishing</span><span class="v">{{ listing.get_furnishing_display }}</span></div>
+          {% endif %}
+          {% if listing.ownership_type %}
+            <div><span class="k">Ownership</span><span class="v">{{ listing.get_ownership_type_display }}</span></div>
+          {% endif %}
+          {% if listing.price_per_sqft %}
+            <div><span class="k">Per sq ft</span><span class="v mono">{{ listing.price_per_sqft|money:currency }}</span></div>
+          {% endif %}
+        </div>
+      </section>
+
+      {# --- Description --------------------------------------------------- #}
+      {% if listing.description %}
+        <section>
+          <h2 style="margin-bottom: var(--s-3)">About this property</h2>
+          <div class="prose">{{ listing.description|linebreaks }}</div>
+        </section>
+      {% endif %}
+
+      {% if listing.amenities.exists %}
+        <section>
+          <h2 style="margin-bottom: var(--s-3)">Amenities</h2>
+          <div class="chip-row">
+            {% for amenity in listing.amenities.all %}
+              <span class="chip">{% icon amenity.icon "icon icon--sm" %} {{ amenity.name }}</span>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {# --- Valuation ----------------------------------------------------- #}
+      {% if valuation %}
+        <section class="panel" id="valuation">
+          <div class="panel-head">
+            <h3>{% icon "chart-line-up" "icon icon--sm" %} Independent valuation</h3>
+            <span class="badge badge--{{ valuation.confidence_tone }}">
+              {{ valuation.get_confidence_display }} confidence
+            </span>
+          </div>
+
+          <div class="panel-body stack">
+            <div class="valuation-figure">
+              <span class="big">{{ valuation.estimate|money:currency }}</span>
+              {% if valuation.gap_to_asking is not None %}
+                <span class="badge badge--{% if valuation.gap_to_asking > 10 %}caution{% elif valuation.gap_to_asking < -5 %}gain{% else %}neutral{% endif %}">
+                  Asking is {{ valuation.gap_to_asking|percent_signed }}
+                </span>
+              {% endif %}
+            </div>
+
+            {% comment %}
+              The estimate band, with the asking price marked against it.
+              Positions come from the view, so the template does no maths.
+            {% endcomment %}
+            <div class="range" aria-hidden="true">
+              <div class="range-track"></div>
+              <div class="range-band"
+                   style="left: {{ range_marks.band_left }}%; right: {{ range_marks.band_right }}%; top: 12px; height: 14px"></div>
+              <div class="range-mark" style="left: {{ range_marks.estimate }}%">
+                <span>{{ valuation.estimate|money:currency }}</span>
+              </div>
+              {% if range_marks.asking is not None %}
+                <div class="range-mark range-mark--asking" style="left: {{ range_marks.asking }}%">
+                  <span>asking</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="row row--between subtle mono" style="font-size: var(--text-xs)">
+              <span>{{ valuation.low|money:currency }}</span>
+              <span>range</span>
+              <span>{{ valuation.high|money:currency }}</span>
+            </div>
+
+            {% if valuation.narrative %}
+              <p class="prose" style="font-size: var(--text-sm)">{{ valuation.narrative }}</p>
+            {% endif %}
+
+            {% if valuation.adjustments %}
+              <div>
+                <p class="label" style="margin-bottom: var(--s-2)">Adjustments applied</p>
+                {% for adjustment in valuation.adjustments %}
+                  <div class="adjust-row">
+                    <span>
+                      <strong>{{ adjustment.label }}</strong>
+                      <span class="subtle"> {{ adjustment.reason }}</span>
+                    </span>
+                    <span class="value {{ adjustment.percent|delta_class }}">
+                      {{ adjustment.percent|percent_signed }}
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% if valuation.comparables %}
+              <details>
+                <summary class="label" style="cursor: pointer; padding-block: var(--s-2)">
+                  The {{ valuation.comparable_count }} comparable{{ valuation.comparable_count|pluralize }} used
+                </summary>
+                <div style="margin-top: var(--s-2)">
+                  {% for comparable in valuation.comparables %}
+                    <div class="comp-row">
+                      <div>
+                        <a href="/properties/{{ comparable.public_id }}/">{{ comparable.title }}</a>
+                        <div class="subtle" style="font-size: var(--text-xs)">
+                          {{ comparable.location }}
+                          {% if comparable.reasons %}
+                            <span class="subtle"> ({{ comparable.reasons|join:", " }})</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div class="mono">{{ comparable.rate_per_sqft|money:currency }}/sq ft</div>
+                        <div class="weight">weight {{ comparable.weight_percent }}%</div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </details>
+            {% endif %}
+          </div>
+
+          <div class="panel-foot row row--between">
+            <span class="subtle mono" style="font-size: var(--text-2xs)">
+              {% if valuation.provider == "local" %}
+                computed locally
+              {% else %}
+                explained by {{ valuation.provider }} &middot; {{ valuation.model_name }}
+              {% endif %}
+              &middot; {{ valuation.created_at|ago }}
+            </span>
+            {% if is_owner %}
+              <form method="post" action="{% url 'properties:revalue' listing.public_id %}" data-guard>
+                {% csrf_token %}
+                <button type="submit" class="btn btn--quiet btn--sm">
+                  {% icon "arrows-clockwise" "icon icon--sm" %} Recompute
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
+
+      {# --- Risk ---------------------------------------------------------- #}
+      {% if risk %}
+        <section class="panel">
+          <div class="panel-head">
+            <h3>{% icon "shield-check" "icon icon--sm" %} Risk assessment</h3>
+            <span class="badge badge--{{ risk.tone }}">{{ risk.get_band_display }}</span>
+          </div>
+
+          <div class="panel-body">
+            <div class="risk-score" style="margin-bottom: var(--s-2)">
+              <span class="n">{{ risk.score }}</span>
+              <span class="subtle">out of 100, lower is better</span>
+            </div>
+            <p class="muted" style="font-size: var(--text-sm); margin-bottom: var(--s-4)">
+              {{ risk.summary }}
+            </p>
+
+            {% for factor in risk.factors %}
+              <div class="factor">
+                <div class="head">
+                  <span>{{ factor.label }}</span>
+                  <span class="n">{{ factor.points }} / {{ factor.weight }}</span>
+                </div>
+                <div class="meter {% if factor.severity > 60 %}meter--loss{% elif factor.severity > 25 %}meter--caution{% else %}meter--gain{% endif %}">
+                  <span style="width: {{ factor.severity }}%"></span>
+                </div>
+                <p>{{ factor.detail }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {# --- Documents ------------------------------------------------------ #}
+      <section class="panel">
+        <div class="panel-head">
+          <h3>{% icon "file-text" "icon icon--sm" %} Documents</h3>
+          <span class="subtle" style="font-size: var(--text-xs)">
+            {{ documents|length }} on file
+          </span>
+        </div>
+
+        <div class="panel-body">
+          {% for document in documents %}
+            <div class="factor">
+              <div class="head">
+                <span>{{ document.get_kind_display }}</span>
+                <span class="badge badge--{{ document.verification_tone }}">
+                  {{ document.get_verification_display }}
+                </span>
+              </div>
+              {% for check in document.verification_notes %}
+                <p class="row" style="gap: var(--s-2); align-items: flex-start">
+                  {% if check.passed %}
+                    {% icon "check" "icon icon--sm gain" %}
+                  {% else %}
+                    {% icon "warning" "icon icon--sm caution" %}
+                  {% endif %}
+                  <span>{{ check.name }}: {{ check.detail }}</span>
+                </p>
+              {% endfor %}
+            </div>
+          {% empty %}
+            <div class="empty">
+              {% icon "file-text" "icon" %}
+              <h3>No documents yet</h3>
+              <p>This listing has not supplied its title deed or tax receipts.</p>
+            </div>
+          {% endfor %}
+
+          {% if listing.missing_documents %}
+            <div class="alert alert--warning" style="margin-top: var(--s-4)">
+              {% icon "warning" "icon icon--sm" %}
+              <span>Still missing: {{ listing.missing_documents|join:", " }}.</span>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      {# --- Provenance ------------------------------------------------------ #}
+      {% if token %}
+        <section class="panel">
+          <div class="panel-head">
+            <h3>{% icon "seal-check" "icon icon--sm" %} Provenance</h3>
+            <span class="badge badge--{% if token.is_onchain %}gain{% else %}neutral{% endif %}">
+              {% if token.is_onchain %}On chain{% else %}Off chain{% endif %}
+            </span>
+          </div>
+
+          <div class="panel-body stack stack--tight">
+            <div class="row row--between">
+              <span class="subtle">Record</span>
+              <span class="mono">{{ token.token_id }}</span>
+            </div>
+
+            <div class="row row--between">
+              <span class="subtle">Registry</span>
+              {% if token.explorer_contract_url %}
+                <a href="{{ token.explorer_contract_url }}" target="_blank" rel="noopener noreferrer">
+                  {{ token.get_chain_display }}
+                </a>
+              {% else %}
+                <span>{{ token.get_chain_display }}</span>
+              {% endif %}
+            </div>
+
+            {% if token.is_onchain %}
+              <div class="row row--between">
+                <span class="subtle">Token</span>
+                <span class="mono">#{{ token.chain_token_id }}</span>
+              </div>
+              <div class="row row--between">
+                <span class="subtle">Transaction</span>
+                {% if token.explorer_tx_url %}
+                  <a class="mono" href="{{ token.explorer_tx_url }}"
+                     target="_blank" rel="noopener noreferrer">{{ token.short_tx }}</a>
+                {% else %}
+                  <span class="mono">{{ token.short_tx }}</span>
+                {% endif %}
+              </div>
+              <div class="row row--between">
+                <span class="subtle">Block</span>
+                <span class="mono">{{ token.block_number }}</span>
+              </div>
+            {% endif %}
+
+            {% if token.evidence_hash %}
+              <div class="row row--between">
+                <span class="subtle" title="keccak256 of the published evidence bundle">
+                  Evidence hash
+                </span>
+                <span class="mono">{{ token.short_hash }}</span>
+              </div>
+            {% endif %}
+
+            {% for pin in pins %}
+              <div class="row row--between">
+                <span class="subtle">{{ pin.label|default:pin.get_kind_display }}</span>
+                <a class="mono" href="{{ pin.gateway_url }}" rel="noopener noreferrer"
+                   target="_blank">{{ pin.short_cid }}</a>
+              </div>
+            {% endfor %}
+
+            <p class="subtle" style="font-size: var(--text-xs)">
+              {% if token.is_onchain %}
+                The hash above is what the contract holds. Recomputing it from
+                the documents and valuation on this page is how you check that
+                neither has changed since it was recorded.
+              {% elif pins %}
+                The evidence is pinned to IPFS, so anyone holding the identifier
+                can fetch it. The record itself is held by this platform and has
+                not been written to a public chain.
+              {% else %}
+                This record is held by the platform. No contract is deployed and
+                nothing has been written to a public chain, so treat it as a
+                reference number rather than proof of title.
+              {% endif %}
+              <a href="{% url 'chain:status' %}">How this works</a>
+            </p>
+
+            {% if token.is_onchain %}
+              <div id="verification"></div>
+              <button type="button" class="btn btn--quiet btn--sm"
+                      hx-get="{% url 'chain:verify' listing.public_id %}"
+                      hx-target="#verification" hx-swap="innerHTML"
+                      hx-indicator="this">
+                {% icon "shield-check" "icon icon--sm" %} Check against the contract
+              </button>
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
+
+      {# --- Price history --------------------------------------------------- #}
+      {% if price_chart %}
+        <section class="panel">
+          <div class="panel-head">
+            <h3>{% icon "trend-up" "icon icon--sm" %} Asking price history</h3>
+            <span class="mono {{ price_chart.change|delta_class }}" style="font-size: var(--text-sm)">
+              {{ price_chart.change|percent_signed }}
+            </span>
+          </div>
+          <div class="panel-body">
+            <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none" role="img"
+                 aria-label="Asking price from {{ price_chart.low|money }} to {{ price_chart.high|money }}">
+              <polygon class="area" points="{{ price_chart.area }}"></polygon>
+              <polyline class="line" points="{{ price_chart.polyline }}"></polyline>
+            </svg>
+            <div class="row row--between subtle mono" style="font-size: var(--text-xs); margin-top: var(--s-3)">
+              <span>{{ price_chart.first_date|date:"M Y" }}</span>
+              <span>{{ price_chart.low|money:currency }} to {{ price_chart.high|money:currency }}</span>
+              <span>{{ price_chart.last_date|date:"M Y" }}</span>
+            </div>
+          </div>
+        </section>
+      {% endif %}
+
+      {# --- Ask ------------------------------------------------------------ #}
+      <section class="panel" id="ask">
+        <div class="panel-head">
+          <h3>{% icon "chat-circle-dots" "icon icon--sm" %} Ask about this property</h3>
+        </div>
+        <div class="panel-body">
+          <form class="ask-form" hx-post="{% url 'properties:ask' listing.public_id %}"
+                hx-target="#answer" hx-swap="innerHTML" hx-indicator="#ask-spinner">
+            {% csrf_token %}
+            <label class="input-group" style="flex: 1">
+              <span class="sr-only">Your question</span>
+              <input type="text" name="question" required
+                     placeholder="Is the asking price fair? What documents are missing?">
+            </label>
+            <button type="submit" class="btn btn--solid">Ask</button>
+          </form>
+
+          <div class="suggestions">
+            <button type="button" class="chip" data-suggest="Is this fairly priced?">Is this fairly priced?</button>
+            <button type="button" class="chip" data-suggest="What documents are on file?">What documents are on file?</button>
+            <button type="button" class="chip" data-suggest="What are the risks?">What are the risks?</button>
+            {% if listing.fractional_enabled %}
+              <button type="button" class="chip" data-suggest="How do the shares work?">How do the shares work?</button>
+            {% endif %}
+          </div>
+
+          <div id="answer"></div>
+
+          <p class="subtle" style="font-size: var(--text-2xs); margin-top: var(--s-4)">
+            Answers come only from this listing's own record. Nothing is inferred
+            about the neighbourhood, the market or the future.
+          </p>
+        </div>
+      </section>
+
+      {% if similar %}
+        <section>
+          <div class="section-head">
+            <h2>Similar nearby</h2>
+          </div>
+          <div class="card-grid">
+            {% for item in similar %}
+              {% with listing=item %}{% include "partials/listing_card.html" %}{% endwith %}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    {# --- Aside ----------------------------------------------------------- #}
+    <aside class="detail-aside">
+      <div class="panel panel--pad">
+        <span class="label">Asking price</span>
+        <div class="row" style="align-items: baseline; gap: var(--s-2); margin-block: var(--s-1) var(--s-3)">
+          <span class="mono" style="font-size: var(--text-2xl); font-weight: 460; letter-spacing: -0.04em">
+            {{ listing.asking_price|money:currency }}
+          </span>
+          {% if listing.price_negotiable %}
+            <span class="badge badge--neutral">Negotiable</span>
+          {% endif %}
+        </div>
+        <p class="subtle mono" style="font-size: var(--text-xs)">
+          &#8377;{{ listing.asking_price|money_exact }}
+        </p>
+
+        {% if listing.fractional_enabled %}
+          <div style="margin-top: var(--s-5); padding-top: var(--s-4); border-top: 1px solid var(--line)">
+            <div class="row row--between" style="margin-bottom: var(--s-2)">
+              <span class="label">Fractional</span>
+              <span class="mono" style="font-size: var(--text-xs)">
+                {{ listing.share_price|money:currency }} a share
+              </span>
+            </div>
+            <div class="meter"><span style="width: {{ listing.fraction_sold_percent }}%"></span></div>
+            <p class="subtle" style="font-size: var(--text-xs); margin-top: var(--s-2)">
+              {{ listing.shares_available|intcomma }} of {{ listing.total_shares|intcomma }} shares left
+            </p>
+
+            {% if user.is_authenticated and not is_owner and listing.is_tradeable %}
+              <form method="post" action="{% url 'market:buy_shares' listing.public_id %}"
+                    class="stack stack--tight" style="margin-top: var(--s-4)" data-guard>
+                {% csrf_token %}
+                <label class="field">
+                  <span class="field-label">Shares to buy</span>
+                  <input class="input mono" type="number" name="shares" min="1"
+                         max="{{ listing.shares_available }}" value="10"
+                         data-rupee-echo="#share-cost">
+                  <span class="field-hint mono" id="share-cost"></span>
+                </label>
+                <button type="submit" class="btn btn--solid btn--block">Buy shares</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if user.is_authenticated and not is_owner and listing.is_tradeable %}
+          <form method="post" action="{% url 'market:make_offer' listing.public_id %}"
+                class="stack stack--tight" style="margin-top: var(--s-5)" data-guard>
+            {% csrf_token %}
+            <label class="field">
+              <span class="field-label">Offer the whole property</span>
+              <input class="input mono" type="number" name="amount" min="1" step="10000"
+                     value="{{ listing.asking_price|floatformat:0 }}" data-rupee-echo="#offer-echo">
+              <span class="field-hint mono" id="offer-echo"></span>
+            </label>
+            <label class="field">
+              <span class="sr-only">Message to the seller</span>
+              <textarea class="textarea" name="message" rows="2"
+                        placeholder="Optional message to the seller"></textarea>
+            </label>
+            <button type="submit" class="btn btn--outline btn--block">
+              {% icon "handshake" "icon icon--sm" %} Make an offer
+            </button>
+          </form>
+        {% elif not user.is_authenticated %}
+          <a class="btn btn--solid btn--block" style="margin-top: var(--s-5)"
+             href="{% url 'accounts:login' %}?next={{ request.path }}">
+            Sign in to make an offer
+          </a>
+        {% elif is_owner %}
+          <p class="alert alert--info" style="margin-top: var(--s-5)">
+            {% icon "info" "icon icon--sm" %}
+            <span>This is your listing. {{ listing.view_count }} view{{ listing.view_count|pluralize }} so far.</span>
+          </p>
+        {% endif %}
+      </div>
+
+      {% if offers %}
+        <div class="panel">
+          <div class="panel-head"><h3>{% if is_owner %}Offers received{% else %}Your offers{% endif %}</h3></div>
+          <div class="panel-body stack stack--tight">
+            {% for offer in offers %}
+              <a class="row row--between" href="{% url 'market:offer_detail' offer.public_id %}">
+                <span>
+                  <span class="mono">{{ offer.amount|money:currency }}</span>
+                  <span class="subtle" style="font-size: var(--text-xs)"> {{ offer.created_at|ago }}</span>
+                </span>
+                <span class="badge badge--{{ offer.tone }}">{{ offer.get_status_display }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="panel panel--pad">
+        <span class="label">Listed by</span>
+        <a class="row" style="margin-top: var(--s-3)" href="{{ listing.owner.profile.get_absolute_url }}">
+          {% if listing.owner.profile.avatar %}
+            <img class="avatar avatar--lg" src="{{ listing.owner.profile.avatar.url }}" alt="" width="52" height="52">
+          {% else %}
+            <span class="avatar avatar--lg">{{ listing.owner.profile.name|initials }}</span>
+          {% endif %}
+          <span>
+            <strong style="display: block">{{ listing.owner.profile.name }}</strong>
+            <span class="badge badge--{{ listing.owner.profile.kyc_tone }}">
+              {% if listing.owner.profile.is_kyc_verified %}
+                {% icon "seal-check" "icon icon--sm" %} Identity verified
+              {% else %}
+                Identity {{ listing.owner.profile.get_kyc_status_display|lower }}
+              {% endif %}
+            </span>
+          </span>
+        </a>
+      </div>
+
+      {% if listing.token %}
+        <div class="panel panel--pad">
+          <span class="label">Provenance</span>
+          <div class="stack stack--tight" style="margin-top: var(--s-3); font-size: var(--text-xs)">
+            <div class="row row--between">
+              <span class="subtle">Token</span>
+              <span class="mono">{{ listing.token.token_id }}</span>
+            </div>
+            <div class="row row--between">
+              <span class="subtle">Registry</span>
+              <span class="mono">{{ listing.token.get_chain_display }}</span>
+            </div>
+            <div class="row row--between">
+              <span class="subtle">Reference</span>
+              <span class="mono">{{ listing.token.short_tx }}</span>
+            </div>
+
+            {% for pin in listing.pins.all|slice:":3" %}
+              <div class="row row--between">
+                <span class="subtle">{{ pin.get_kind_display }} on IPFS</span>
+                <a class="mono" href="{{ pin.gateway_url }}" rel="noopener" target="_blank">
+                  {{ pin.short_cid }}
+                </a>
+              </div>
+            {% empty %}
+              <div class="row row--between">
+                <span class="subtle">IPFS</span>
+                <span class="mono subtle">not pinned</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <p class="subtle" style="font-size: var(--text-2xs); margin-top: var(--s-3); line-height: 1.5">
+            {% if listing.pins.exists %}
+              The metadata above is pinned, so the documents behind this listing
+              can be checked without going through Basix.
+            {% else %}
+              This build has no IPFS credentials configured, so the evidence is
+              held locally rather than pinned. The token is a local registry
+              entry, not a public chain transaction.
+            {% endif %}
+          </p>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll("[data-suggest]").forEach((chip) =>
+    chip.addEventListener("click", () => {
+      const input = document.querySelector('.ask-form input[name="question"]');
+      input.value = chip.dataset.suggest;
+      input.form.requestSubmit();
+    })
+  );
+</script>
+{% endblock %}

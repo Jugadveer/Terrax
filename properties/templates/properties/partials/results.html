@@ -1,0 +1,119 @@
+{% load basix %}
+{% comment %}
+  The only part of the marketplace that re-renders when a filter changes.
+  The page shell, the stylesheet, the fonts and the filter form all stay
+  mounted, which is why filtering does not feel like a page load.
+{% endcomment %}
+<div id="results">
+  <div class="results-head">
+    <p class="results-count">
+      <strong>{{ total }}</strong> propert{{ total|pluralize:"y,ies" }}
+      {% if form.city.value %}in {{ form.city.value }}{% endif %}
+    </p>
+
+    <div class="row">
+      {% if user.is_authenticated and form.active_filters %}
+        {% comment %}
+          The current filters are forwarded as hidden fields, so the saved
+          search stores exactly what is on screen.
+        {% endcomment %}
+        <form method="post" action="{% url 'accounts:save_search' %}" class="row" style="gap: var(--s-2)">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% for key, values in request.GET.lists %}
+            {% for value in values %}
+              {% if key != "page" %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}
+            {% endfor %}
+          {% endfor %}
+          <input class="input" type="text" name="name" placeholder="Name this search"
+                 style="width: 170px; height: 32px; font-size: var(--text-xs)" required>
+          <button type="submit" class="btn btn--outline btn--sm">
+            {% icon "bookmark-simple" "icon icon--sm" %} Save
+          </button>
+        </form>
+      {% endif %}
+
+      <label class="row" style="gap: var(--s-2)">
+        <span class="sr-only">Sort by</span>
+        <select class="select" name="sort" style="height: 32px; font-size: var(--text-xs); width: auto"
+                hx-get="{% url 'properties:index' %}"
+                hx-target="#results" hx-select="#results" hx-swap="outerHTML"
+                hx-push-url="true" hx-include="#filters">
+          {% for key, option in sort_options.items %}
+            <option value="{{ key }}" {% if active_sort == key %}selected{% endif %}>{{ option.0 }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <a class="btn btn--outline btn--sm" href="{% url 'properties:map' %}?{{ request.GET.urlencode }}">
+        {% icon "map-pin" "icon icon--sm" %} Map
+      </a>
+    </div>
+  </div>
+
+  {% if form.active_filters %}
+    <div class="chip-row" style="margin-bottom: var(--s-4)">
+      {% for name, label, value in form.active_filters %}
+        <a class="chip is-on" href="{% query_without name %}"
+           hx-get="{% query_without name %}"
+           hx-target="#results" hx-select="#results" hx-swap="outerHTML" hx-push-url="true">
+          {{ label }}: {{ value }}
+          {% icon "x" "icon icon--sm" %}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="results-body">
+    {% if page.object_list %}
+      <div class="card-grid">
+        {% for listing in page %}
+          {% include "partials/listing_card.html" %}
+        {% endfor %}
+      </div>
+
+      {% if page.has_other_pages %}
+        <nav class="pager" aria-label="Pagination">
+          {% if page.has_previous %}
+            <a class="btn btn--outline btn--sm"
+               href="{% query_replace page=page.previous_page_number %}"
+               hx-get="{% query_replace page=page.previous_page_number %}"
+               hx-target="#results" hx-select="#results" hx-swap="outerHTML" hx-push-url="true">
+              {% icon "caret-left" "icon icon--sm" %} Previous
+            </a>
+          {% endif %}
+
+          {% for number in page.paginator.page_range %}
+            {% if number == page.number %}
+              <span class="page-num" aria-current="page">{{ number }}</span>
+            {% elif number == 1 or number == page.paginator.num_pages or number|add:"-2" <= page.number and number|add:"2" >= page.number %}
+              <a class="page-num" href="{% query_replace page=number %}"
+                 hx-get="{% query_replace page=number %}"
+                 hx-target="#results" hx-select="#results" hx-swap="outerHTML" hx-push-url="true">{{ number }}</a>
+            {% endif %}
+          {% endfor %}
+
+          {% if page.has_next %}
+            <a class="btn btn--outline btn--sm"
+               href="{% query_replace page=page.next_page_number %}"
+               hx-get="{% query_replace page=page.next_page_number %}"
+               hx-target="#results" hx-select="#results" hx-swap="outerHTML" hx-push-url="true">
+              Next {% icon "caret-right" "icon icon--sm" %}
+            </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="empty panel">
+        {% icon "magnifying-glass" "icon" %}
+        <h3>Nothing matches those filters</h3>
+        <p>
+          Try widening the price range, or removing the city. There are
+          {{ total }} listings in total across the market.
+        </p>
+        <a class="btn btn--outline btn--sm" href="{% url 'properties:index' %}">Clear every filter</a>
+      </div>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,69 @@
+{% load basix %}
+<form method="post" enctype="multipart/form-data" class="stack stack--loose" data-guard>
+  {% csrf_token %}
+
+  <div class="panel panel--pad stack">
+    <div>
+      <h2 style="font-size: var(--text-lg)">Photographs</h2>
+      <p class="muted" style="font-size: var(--text-sm); margin-top: var(--s-1)">
+        The first one becomes the cover. Wide shots of the main rooms sell a
+        listing faster than close-ups of fittings.
+      </p>
+    </div>
+
+    <label class="dropzone" data-dropzone>
+      {% icon "upload-simple" "icon icon--lg" %}
+      <strong>Drop photographs here, or choose files</strong>
+      <span>{{ form.images.help_text }}</span>
+      {{ form.images }}
+    </label>
+    <div data-file-list class="file-list"></div>
+
+    {% for error in form.images.errors %}
+      <span class="field-error" role="alert">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+  {% if images %}
+    <div class="panel panel--pad stack">
+      <div class="row row--between">
+        <h3 style="font-size: var(--text-base)">Already uploaded</h3>
+        <span class="subtle" style="font-size: var(--text-xs)">{{ images|length }} photograph{{ images|length|pluralize }}</span>
+      </div>
+
+      <div class="photo-grid">
+        {% for image in images %}
+          <figure class="photo-tile">
+            <img src="{{ image.display_url }}" alt="{{ image.alt_text }}" width="320" height="240" loading="lazy">
+            {% if image.is_cover %}
+              <span class="cover-flag badge badge--accent">Cover</span>
+            {% endif %}
+            <div class="tools">
+              {% if not image.is_cover %}
+                <form method="post" action="{% url 'properties:set_cover' listing.public_id image.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="icon-chip" aria-label="Use as cover">
+                    {% icon "star" "icon icon--sm" %}
+                  </button>
+                </form>
+              {% endif %}
+              <form method="post" action="{% url 'properties:delete_image' listing.public_id image.id %}"
+                    data-confirm="Remove this photograph?">
+                {% csrf_token %}
+                <button type="submit" class="icon-chip" aria-label="Remove photograph">
+                  {% icon "trash" "icon icon--sm" %}
+                </button>
+              </form>
+            </div>
+          </figure>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row row--end">
+    <button type="submit" class="btn btn--solid">
+      Continue {% icon "arrow-right" "icon icon--sm" %}
+    </button>
+  </div>
+</form>

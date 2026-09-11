@@ -1,0 +1,109 @@
+{% load basix %}
+<form method="post" class="stack stack--loose" data-guard>
+  {% csrf_token %}
+
+  <section class="panel panel--pad stack">
+    <h2 style="font-size: var(--text-lg)">How it is described</h2>
+
+    {% include "partials/field.html" with field=form.title %}
+    {% include "partials/field.html" with field=form.summary %}
+
+    <div class="field">
+      <div class="row row--between">
+        <label for="{{ form.description.id_for_label }}">
+          {{ form.description.label }}<span class="req" aria-hidden="true">*</span>
+        </label>
+        <button type="button" class="btn btn--quiet btn--sm" id="draft-copy"
+                {% if not listing %}disabled{% endif %}>
+          {% icon "sparkle" "icon icon--sm" %} Draft from the details
+        </button>
+      </div>
+      {{ form.description }}
+      {% for error in form.description.errors %}
+        <span class="field-error" role="alert">{{ error }}</span>
+      {% endfor %}
+      <span class="field-hint" id="draft-source"></span>
+    </div>
+  </section>
+
+  <section class="panel panel--pad stack">
+    <h2 style="font-size: var(--text-lg)">What it is</h2>
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.property_type %}
+      {% include "partials/field.html" with field=form.ownership_type %}
+      {% include "partials/field.html" with field=form.furnishing %}
+      {% include "partials/field.html" with field=form.facing %}
+      {% include "partials/field.html" with field=form.area_sqft %}
+      {% include "partials/field.html" with field=form.carpet_area_sqft %}
+      {% include "partials/field.html" with field=form.bedrooms %}
+      {% include "partials/field.html" with field=form.bathrooms %}
+      {% include "partials/field.html" with field=form.floor %}
+      {% include "partials/field.html" with field=form.total_floors %}
+      {% include "partials/field.html" with field=form.year_built %}
+    </div>
+  </section>
+
+  <section class="panel panel--pad stack">
+    <h2 style="font-size: var(--text-lg)">Where it is</h2>
+    <div class="form-grid">
+      <div class="span-2">{% include "partials/field.html" with field=form.address_line %}</div>
+      {% include "partials/field.html" with field=form.locality %}
+      {% include "partials/field.html" with field=form.city %}
+      {% include "partials/field.html" with field=form.state %}
+      {% include "partials/field.html" with field=form.pincode %}
+    </div>
+    {{ form.latitude }}
+    {{ form.longitude }}
+    <p class="field-hint">
+      The city and locality are what the valuation uses to pick comparable
+      properties, so keep them accurate.
+    </p>
+  </section>
+
+  <section class="panel panel--pad stack">
+    <h2 style="font-size: var(--text-lg)">Amenities</h2>
+    <div class="chip-row">
+      {% for choice in form.amenities %}
+        <label class="chip">
+          {{ choice.tag }}
+          {{ choice.choice_label }}
+        </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="row row--between">
+    <a class="btn btn--quiet" href="{% url 'properties:wizard_step' listing.public_id 1 %}">
+      {% icon "arrow-left" "icon icon--sm" %} Back
+    </a>
+    <button type="submit" class="btn btn--solid">
+      Continue {% icon "arrow-right" "icon icon--sm" %}
+    </button>
+  </div>
+</form>
+
+<script>
+  // Fills the description box from the structured fields already entered.
+  document.getElementById("draft-copy")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    const source = document.getElementById("draft-source");
+    button.disabled = true;
+    source.textContent = "Writing a draft from the details above";
+    try {
+      const response = await fetch("{% url 'properties:describe' listing.public_id %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+      });
+      const data = await response.json();
+      document.getElementById("{{ form.description.id_for_label }}").value = data.text;
+      source.textContent =
+        data.provider === "local"
+          ? "Drafted locally from the fields you filled in. Edit it before saving."
+          : `Drafted by ${data.provider} from the fields you filled in. Edit it before saving.`;
+    } catch (error) {
+      source.textContent = "Could not write a draft. Write the description yourself.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>

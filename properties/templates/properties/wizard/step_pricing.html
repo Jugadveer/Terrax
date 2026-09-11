@@ -1,0 +1,86 @@
+{% load basix humanize %}
+<form method="post" class="stack stack--loose" data-guard>
+  {% csrf_token %}
+
+  {% if guide %}
+    {% comment %}
+      The seller sees the same comparable-sales estimate a buyer will see,
+      before they pick a number, rather than being surprised by it later.
+    {% endcomment %}
+    <section class="panel">
+      <div class="panel-head">
+        <h3>{% icon "chart-line-up" "icon icon--sm" %} What comparable properties suggest</h3>
+        <span class="badge badge--{% if guide.confidence == 'high' %}gain{% elif guide.confidence == 'moderate' %}info{% else %}caution{% endif %}">
+          {{ guide.confidence }} confidence
+        </span>
+      </div>
+      <div class="panel-body">
+        <div class="valuation-figure">
+          <span class="big">{{ guide.estimate|money }}</span>
+          <span class="subtle">{{ guide.low|money }} to {{ guide.high|money }}</span>
+        </div>
+        <p class="muted" style="font-size: var(--text-sm); margin-top: var(--s-3)">
+          {% if guide.comparables %}
+            Based on {{ guide.comparables|length }} comparable propert{{ guide.comparables|length|pluralize:"y,ies" }},
+            at {{ guide.rate_per_sqft|money }} per sq ft after adjustments.
+            Pricing well above this widens the risk score, and buyers see both.
+          {% else %}
+            There were too few comparable listings nearby, so this is a regional
+            benchmark. Treat it as a starting point.
+          {% endif %}
+        </p>
+
+        {% if guide.adjustments %}
+          <div style="margin-top: var(--s-4)">
+            {% for adjustment in guide.adjustments %}
+              <div class="adjust-row">
+                <span><strong>{{ adjustment.label }}</strong> <span class="subtle">{{ adjustment.reason }}</span></span>
+                <span class="value {{ adjustment.percent|delta_class }}">{{ adjustment.percent|percent_signed }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="panel panel--pad stack">
+    <h2 style="font-size: var(--text-lg)">Your asking price</h2>
+
+    <div class="field">
+      <label for="{{ form.asking_price.id_for_label }}">
+        {{ form.asking_price.label }}<span class="req" aria-hidden="true">*</span>
+      </label>
+      <input class="input mono" type="number" name="asking_price" min="50000" step="10000"
+             id="{{ form.asking_price.id_for_label }}"
+             value="{{ form.asking_price.value|default:'' }}"
+             data-rupee-echo="#price-echo">
+      <span class="field-hint mono" id="price-echo"></span>
+      {% for error in form.asking_price.errors %}
+        <span class="field-error" role="alert">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+    {% include "partials/field.html" with field=form.price_negotiable %}
+  </section>
+
+  <section class="panel panel--pad stack">
+    <h2 style="font-size: var(--text-lg)">Fractional ownership</h2>
+    <p class="muted" style="font-size: var(--text-sm)">
+      Splitting the property into shares lets buyers take a position without
+      buying the whole thing. You keep whatever is unsold.
+    </p>
+
+    {% include "partials/field.html" with field=form.fractional_enabled %}
+    {% include "partials/field.html" with field=form.total_shares %}
+  </section>
+
+  <div class="row row--between">
+    <a class="btn btn--quiet" href="{% url 'properties:wizard_step' listing.public_id 3 %}">
+      {% icon "arrow-left" "icon icon--sm" %} Back
+    </a>
+    <button type="submit" class="btn btn--solid">
+      Continue {% icon "arrow-right" "icon icon--sm" %}
+    </button>
+  </div>
+</form>

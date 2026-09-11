@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load basix humanize %}
+
+{% block title %}Compare properties{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Compare</h1>
+    <p>
+      Up to four at a time, against their own valuations rather than against
+      each other's asking prices.
+    </p>
+  </header>
+
+  {% if listings %}
+    <div class="table-wrap panel">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 180px">Property</th>
+            {% for listing in listings %}
+              <th style="min-width: 220px">
+                <a href="{{ listing.get_absolute_url }}" style="font-weight: 540; white-space: normal">
+                  {{ listing.title }}
+                </a>
+                <div class="subtle" style="font-weight: 400; text-transform: none; letter-spacing: 0">
+                  {{ listing.location_label }}
+                </div>
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="subtle">Photograph</td>
+            {% for listing in listings %}
+              <td>
+                {% if listing.cover_image %}
+                  <img src="{{ listing.cover_image.display_url }}" alt="{{ listing.title }}"
+                       width="200" height="132" loading="lazy"
+                       style="border-radius: var(--r-sm); object-fit: cover; width: 200px; height: 132px">
+                {% else %}
+                  <span class="subtle">None</span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+
+          {% for row in rows %}
+            <tr>
+              <td class="subtle">{{ row.label }}</td>
+              {% for cell in row.cells %}
+                <td>
+                  {% if cell.kind == "money" %}
+                    <span class="mono">{{ cell.value|money:currency }}</span>
+                  {% elif cell.kind == "area" %}
+                    <span class="mono">{{ cell.value|floatformat:0|intcomma }} sq ft</span>
+                  {% elif cell.kind == "gap" %}
+                    <span class="mono {{ cell.value|delta_class }}">{{ cell.value|percent_signed }}</span>
+                  {% elif cell.kind == "risk" %}
+                    <span class="badge badge--{{ cell.value.tone }}">{{ cell.value.score }} / 100</span>
+                  {% elif cell.kind == "bool" %}
+                    {% if cell.value %}
+                      <span class="badge badge--accent">Yes</span>
+                    {% else %}
+                      <span class="subtle">No</span>
+                    {% endif %}
+                  {% elif cell.kind == "blank" %}
+                    <span class="subtle">-</span>
+                  {% else %}
+                    {{ cell.value }}
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+
+          <tr>
+            <td></td>
+            {% for listing in listings %}
+              <td>
+                <a class="btn btn--outline btn--sm" href="{{ listing.get_absolute_url }}">
+                  Open listing
+                </a>
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="subtle" style="font-size: var(--text-xs); margin-top: var(--s-4)">
+      This comparison is in the address bar, so you can send it to someone.
+    </p>
+  {% else %}
+    <div class="empty panel">
+      {% icon "scales" "icon" %}
+      <h3>Nothing selected yet</h3>
+      <p>
+        Pick the scales icon on any listing card to add it here. Up to four
+        properties can be compared at once.
+      </p>
+      <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}">Browse the market</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% load basix %}
+{# Swapped in by HTMX after a watch toggle, so only this button repaints. #}
+<form method="post" action="{% url 'properties:watch' listing.public_id %}"
+      hx-post="{% url 'properties:watch' listing.public_id %}"
+      hx-swap="outerHTML" hx-target="this">
+  {% csrf_token %}
+  <button type="submit" class="icon-chip {% if is_watching %}is-on{% endif %}"
+          aria-label="{% if is_watching %}Remove from watchlist{% else %}Add to watchlist{% endif %}">
+    {% icon "heart" "icon icon--sm" %}
+  </button>
+</form>

@@ -1,0 +1,103 @@
+{% load basix %}
+<div class="stack stack--loose">
+  {% if missing %}
+    <div class="alert alert--warning">
+      {% icon "warning" "icon icon--sm" %}
+      <span>Still needed before you can submit: {{ missing|join:", " }}.</span>
+    </div>
+  {% else %}
+    <div class="alert alert--success">
+      {% icon "check-circle" "icon icon--sm" %}
+      <span>Every required document is on file.</span>
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="panel panel--pad stack" data-guard>
+    {% csrf_token %}
+    <div>
+      <h2 style="font-size: var(--text-lg)">Add a document</h2>
+      <p class="muted" style="font-size: var(--text-sm); margin-top: var(--s-1)">
+        Checks run the moment a file lands: format read from the bytes, scan
+        resolution, expiry date, and whether the same file is already attached
+        to another listing.
+      </p>
+    </div>
+
+    <div class="form-grid">
+      {% include "partials/field.html" with field=form.kind %}
+      {% include "partials/field.html" with field=form.expires_on %}
+    </div>
+
+    <label class="dropzone" data-dropzone>
+      {% icon "file-text" "icon icon--lg" %}
+      <strong>Drop the file here, or choose one</strong>
+      <span>PDF, JPEG or PNG, up to 15 MB</span>
+      {{ form.file }}
+    </label>
+    <div data-file-list class="file-list"></div>
+    {% for error in form.file.errors %}
+      <span class="field-error" role="alert">{{ error }}</span>
+    {% endfor %}
+
+    <div class="row row--end">
+      <button type="submit" class="btn btn--outline">
+        {% icon "upload-simple" "icon icon--sm" %} Upload and check
+      </button>
+    </div>
+  </form>
+
+  {% if documents %}
+    <section class="panel">
+      <div class="panel-head">
+        <h3>On file</h3>
+        <span class="subtle" style="font-size: var(--text-xs)">{{ documents|length }} document{{ documents|length|pluralize }}</span>
+      </div>
+      <div class="panel-body">
+        {% for document in documents %}
+          <div class="factor">
+            <div class="head">
+              <span class="row" style="gap: var(--s-2)">
+                {{ document.get_kind_display }}
+                <span class="subtle mono" style="font-size: var(--text-2xs)">
+                  {{ document.original_name|truncatechars:26 }}
+                </span>
+              </span>
+              <span class="row" style="gap: var(--s-2)">
+                <span class="badge badge--{{ document.verification_tone }}">
+                  {{ document.get_verification_display }}
+                </span>
+                <form method="post"
+                      action="{% url 'properties:delete_document' listing.public_id document.id %}"
+                      data-confirm="Remove this document?">
+                  {% csrf_token %}
+                  <button type="submit" class="icon-chip" aria-label="Remove document">
+                    {% icon "trash" "icon icon--sm" %}
+                  </button>
+                </form>
+              </span>
+            </div>
+            {% for check in document.verification_notes %}
+              <p class="row" style="gap: var(--s-2); align-items: flex-start">
+                {% if check.passed %}
+                  {% icon "check" "icon icon--sm gain" %}
+                {% else %}
+                  {% icon "warning" "icon icon--sm caution" %}
+                {% endif %}
+                <span>{{ check.name }}: {{ check.detail }}</span>
+              </p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="row row--between">
+    <a class="btn btn--quiet" href="{% url 'properties:wizard_step' listing.public_id 2 %}">
+      {% icon "arrow-left" "icon icon--sm" %} Back
+    </a>
+    <a class="btn btn--solid" href="{% url 'properties:wizard_step' listing.public_id 4 %}">
+      Continue {% icon "arrow-right" "icon icon--sm" %}
+    </a>
+  </div>
+</div>

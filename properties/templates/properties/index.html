@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Marketplace, {{ total }} properties on Basix{% endblock %}
+{% block description %}Browse verified property listings with independent valuations, document checks and fractional ownership.{% endblock %}
+
+{% block content %}
+<div class="page">
+  <header class="page-header">
+    <h1>Marketplace</h1>
+    <p>
+      Every listing here has been through document checks and carries a
+      comparable-sales valuation. Filter it down, or describe what you want in
+      plain language.
+    </p>
+
+    <form class="row" style="margin-top: var(--s-5); max-width: 640px"
+          method="post" action="{% url 'intelligence:natural_search' %}">
+      {% csrf_token %}
+      <label class="input-group" style="flex: 1">
+        <span class="sr-only">Describe what you are looking for</span>
+        {% icon "sparkle" "icon icon--sm" %}
+        <input type="search" name="query" placeholder="3 bhk in Pune under 90 lakh">
+      </label>
+      <button type="submit" class="btn btn--solid">Search</button>
+    </form>
+  </header>
+
+  <button type="button" class="btn btn--outline filter-drawer-toggle"
+          style="margin-bottom: var(--s-4)" data-filters-toggle
+          aria-expanded="false" aria-controls="filters">
+    {% icon "funnel" "icon icon--sm" %} Filters
+  </button>
+
+  <div class="market-layout">
+    {% comment %}
+      GET, so the filters end up in the URL. `hx-get` upgrades it to a
+      fragment swap; without JavaScript it is still a working form.
+    {% endcomment %}
+    <form class="filters" id="filters" method="get" action="{% url 'properties:index' %}"
+          hx-get="{% url 'properties:index' %}"
+          hx-target="#results"
+          hx-select="#results"
+          hx-swap="outerHTML"
+          hx-push-url="true"
+          hx-trigger="change, search">
+
+      <div class="filter-group">
+        <h3>Keyword</h3>
+        <label class="input-group">
+          <span class="sr-only">Search listings</span>
+          {% icon "magnifying-glass" "icon icon--sm" %}
+          <input type="search" name="q" value="{{ form.q.value|default:'' }}"
+                 placeholder="Locality, title or description">
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <h3>City</h3>
+        <label class="field">
+          <span class="sr-only">City</span>
+          <select class="select" name="city">
+            <option value="">Every city</option>
+            {% for city in cities %}
+              <option value="{{ city.city }}" {% if form.city.value == city.city %}selected{% endif %}>
+                {{ city.city }} ({{ city.count }})
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <h3>Property type</h3>
+        <label class="field">
+          <span class="sr-only">Property type</span>
+          {{ form.property_type }}
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <h3>Price</h3>
+        <div class="row">
+          <label class="field" style="flex: 1">
+            <span class="field-hint">From</span>
+            <input class="input" type="number" name="price_min" min="0" step="100000"
+                   value="{{ form.price_min.value|default:'' }}" placeholder="0">
+          </label>
+          <label class="field" style="flex: 1">
+            <span class="field-hint">Up to</span>
+            <input class="input" type="number" name="price_max" min="0" step="100000"
+                   value="{{ form.price_max.value|default:'' }}" placeholder="Any">
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>Bedrooms</h3>
+        <div class="chip-row">
+          {% for n in "1234" %}
+            <label class="chip {% if form.bedrooms.value|stringformat:'s' == n %}is-on{% endif %}">
+              <input type="radio" name="bedrooms" value="{{ n }}" class="sr-only"
+                     {% if form.bedrooms.value|stringformat:'s' == n %}checked{% endif %}>
+              {{ n }}+
+            </label>
+          {% endfor %}
+          <label class="chip {% if not form.bedrooms.value %}is-on{% endif %}">
+            <input type="radio" name="bedrooms" value="" class="sr-only"
+                   {% if not form.bedrooms.value %}checked{% endif %}>
+            Any
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>Minimum area</h3>
+        <label class="field">
+          <span class="sr-only">Minimum area in square feet</span>
+          <input class="input" type="number" name="area_min" min="0" step="100"
+                 value="{{ form.area_min.value|default:'' }}" placeholder="sq ft">
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <h3>Options</h3>
+        <label class="check">
+          <input type="checkbox" name="fractional" {% if form.fractional.value %}checked{% endif %}>
+          <span>Open to fractional purchase</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="verified_only" {% if form.verified_only.value %}checked{% endif %}>
+          <span>Documents verified</span>
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <a class="btn btn--quiet btn--sm" href="{% url 'properties:index' %}">
+          {% icon "arrows-clockwise" "icon icon--sm" %} Clear filters
+        </a>
+      </div>
+    </form>
+
+    {% include "properties/partials/results.html" %}
+  </div>
+</div>
+
+<div class="compare-tray" id="compare-tray" hidden>
+  {% icon "scales" "icon icon--sm" %}
+  <span><strong data-compare-count>0</strong> selected</span>
+  <a class="btn btn--solid btn--sm" data-compare-link href="{% url 'properties:compare' %}">Compare</a>
+  <button type="button" class="btn btn--quiet btn--sm" data-compare-clear aria-label="Clear comparison">
+    {% icon "x" "icon icon--sm" %}
+  </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelector("[data-filters-toggle]")?.addEventListener("click", (event) => {
+    const filters = document.getElementById("filters");
+    const open = filters.hasAttribute("hidden");
+    filters.toggleAttribute("hidden", !open);
+    event.currentTarget.setAttribute("aria-expanded", String(open));
+  });
+</script>
+{% endblock %}

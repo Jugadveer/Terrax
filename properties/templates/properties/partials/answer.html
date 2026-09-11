@@ -1,0 +1,20 @@
+{% load basix %}
+{% if error %}
+  <div class="alert alert--warning" style="margin-top: var(--s-4)">
+    {% icon "warning" "icon icon--sm" %}
+    <span>{{ error }}</span>
+  </div>
+{% else %}
+  <div class="answer">
+    <p class="label" style="margin-bottom: var(--s-2)">{{ exchange.question }}</p>
+    <p>{{ exchange.answer }}</p>
+    <div class="source">
+      {% icon "info" "icon icon--sm" %}
+      {% if exchange.provider == "local" %}
+        <span>Answered from this listing's record</span>
+      {% else %}
+        <span>{{ exchange.provider }} &middot; {{ exchange.model_name }} &middot; grounded on this listing only</span>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

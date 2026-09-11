@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load basix humanize %}
+
+{% block title %}{{ step_label }}, step {{ step }} of 5{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header style="margin-bottom: var(--s-6)">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{% url 'accounts:my_listings' %}">My listings</a>
+      <span class="sep">/</span>
+      <span>{% if listing.title %}{{ listing.title }}{% else %}New listing{% endif %}</span>
+    </nav>
+    <h1 style="margin-top: var(--s-3); font-size: var(--text-2xl)">{{ step_label }}</h1>
+    <p class="muted" style="margin-top: var(--s-2)">
+      Step {{ step }} of 5. Everything is saved as you go, so you can leave and come back.
+    </p>
+  </header>
+
+  <div class="wizard-layout">
+    <nav class="wizard-steps" aria-label="Listing steps">
+      {% for number, info in steps.items %}
+        {% if listing %}
+          <a class="wizard-step {% if listing.wizard_step > number %}is-done{% endif %}"
+             href="{% url 'properties:wizard_step' listing.public_id number %}"
+             {% if number == step %}aria-current="step"{% endif %}>
+            <span class="n">{% if listing.wizard_step > number %}{% icon "check" "icon icon--sm" %}{% else %}{{ number }}{% endif %}</span>
+            <span>{{ info.0 }}</span>
+          </a>
+        {% else %}
+          <span class="wizard-step" {% if number == step %}aria-current="step"{% endif %}>
+            <span class="n">{{ number }}</span>
+            <span>{{ info.0 }}</span>
+          </span>
+        {% endif %}
+      {% endfor %}
+
+      <div class="meter" style="margin-top: var(--s-4)">
+        <span style="width: {{ progress }}%"></span>
+      </div>
+    </nav>
+
+    <div class="stack stack--loose">
+      {% if form and form.non_field_errors %}
+        <div class="alert alert--error">
+          {% icon "warning" "icon icon--sm" %}
+          <span>{{ form.non_field_errors|join:" " }}</span>
+        </div>
+      {% endif %}
+
+      {% if step == 1 %}{% include "properties/wizard/step_media.html" %}
+      {% elif step == 2 %}{% include "properties/wizard/step_details.html" %}
+      {% elif step == 3 %}{% include "properties/wizard/step_documents.html" %}
+      {% elif step == 4 %}{% include "properties/wizard/step_pricing.html" %}
+      {% else %}{% include "properties/wizard/step_review.html" %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
