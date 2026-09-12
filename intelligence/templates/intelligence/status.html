@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}How valuations work{% endblock %}
+{% block description %}The comparable-sales method Basix uses, the risk factors and their weights, and exactly what the language model layer does.{% endblock %}
+
+{% block content %}
+<div class="page page--narrow">
+  <header class="page-header">
+    <h1>How the numbers are produced</h1>
+    <p>
+      Two layers. One calculates, and always runs. The other explains, and is
+      optional. Nothing on this site lets the second one decide a figure.
+    </p>
+  </header>
+
+  <div class="panel panel--pad" style="margin-bottom: var(--s-7)">
+    <div class="row row--between row--wrap">
+      <div>
+        <span class="label">Language model layer</span>
+        <div class="row" style="margin-top: var(--s-2)">
+          {% if available %}
+            <span class="badge badge--gain">{% icon "check" "icon icon--sm" %} {{ provider }}</span>
+            <span class="mono subtle" style="font-size: var(--text-xs)">{{ model }}</span>
+          {% else %}
+            <span class="badge badge--neutral">Not configured</span>
+            <span class="subtle" style="font-size: var(--text-xs)">
+              Explanations are written locally instead
+            </span>
+          {% endif %}
+        </div>
+      </div>
+      <div style="text-align: right">
+        <span class="label">Calculation layer</span>
+        <div style="margin-top: var(--s-2)">
+          <span class="badge badge--accent">Always on</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="faq-group">
+    <h2>The valuation</h2>
+
+    <div class="faq-item">
+      <h3>Choosing the comparables</h3>
+      <p>
+        Candidates are drawn in three passes: the same property type in the same
+        city, then the same state, then anywhere. Each pass that has to be
+        reached costs the comparables relevance, and the code applies that cost
+        explicitly rather than pretending a flat in another state is as
+        informative as one next door.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Scoring each one</h3>
+      <p>
+        Size carries the most weight, at 34%, because a price per square foot is
+        only meaningful between properties of a similar size. Location follows at
+        26%, then how recently the comparable was listed at 15%, configuration at
+        14%, and age at 11%. Anything scoring below 0.25 is discarded.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Rebasing across cities</h3>
+      <p>
+        A comparable from another city is rebased onto the target city's median
+        rate before its price per square foot is used. Without that step a one
+        bedroom flat in Bandra gets compared against a flat in Kothrud and comes
+        out at a third of its value. The index is derived from the listings on
+        the site, not from a hard-coded table.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Blending and trimming</h3>
+      <p>
+        The blended rate is a similarity-weighted mean. When there are five or
+        more comparables, any whose rate sits more than two standard deviations
+        from the median is dropped first, so one mispriced listing cannot move
+        the result.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Adjustments</h3>
+      <p>
+        The blended rate is then adjusted for the ways this property differs
+        from the set: age, furnishing, amenity count, aspect, floor position,
+        title type and carpet ratio. Only differences that were actually
+        observed produce an adjustment, so the list on a listing page is never
+        padded out to look thorough.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>The range, and confidence</h3>
+      <p>
+        The interval widens with the scatter of the comparable rates and narrows
+        with the square root of how many there are. High confidence needs five
+        or more comparables and a spread under 12%. Below three comparables the
+        method falls back to a regional benchmark and says so on the page.
+      </p>
+    </div>
+  </section>
+
+  <section class="faq-group">
+    <h2>The risk score</h2>
+    <div class="faq-item">
+      <h3>Seven factors, one hundred points</h3>
+      <p>
+        Documents missing carries 24 points, seller identity 20, price against
+        the valuation 16, failed document checks 14, listing completeness 10,
+        title type 10, and time on the market 6. Under 20 is low risk, under 40
+        moderate, under 65 elevated, and above that high. Every factor that
+        contributed appears on the listing with its points and its reason.
+      </p>
+    </div>
+    <div class="faq-item">
+      <h3>What it does not do</h3>
+      <p>
+        It does not predict fraud, and it does not know anything that is not in
+        the record. A clean score means the checkable things check out, not that
+        the property is a good buy.
+      </p>
+    </div>
+  </section>
+
+  <section class="faq-group">
+    <h2>The language model layer</h2>
+
+    <div class="faq-item">
+      <h3>What it is allowed to do</h3>
+      <p>
+        Four things: explain a valuation it has been handed, draft listing copy
+        from the structured fields, answer a question using only that listing's
+        record, and turn a plain-language search into filters that are then
+        validated against the same allow-list the search form uses.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>What happens when it is not there</h3>
+      <p>
+        Each of those four has a local implementation that runs instead. The
+        explanation is assembled from the comparables and adjustments, the copy
+        is built from the fields, the answer is matched against the record, and
+        the search is parsed with rules. Nothing on the site disappears, and
+        every piece of generated text says which layer produced it.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>Providers</h3>
+      <p>
+        Groq, Google AI Studio, OpenRouter, and a local Ollama instance. All four
+        have a free tier or no cost at all. One environment variable selects
+        between them, and an unset variable means the local layer answers
+        everything.
+      </p>
+    </div>
+  </section>
+
+  {% if snapshots %}
+    <section class="faq-group">
+      <h2>Market snapshots</h2>
+      <div class="table-wrap panel">
+        <table class="table">
+          <thead>
+            <tr><th>Date</th><th>City</th><th class="num">Listings</th><th class="num">Median</th></tr>
+          </thead>
+          <tbody>
+            {% for snapshot in snapshots %}
+              <tr>
+                <td class="mono">{{ snapshot.date|date:"d M Y" }}</td>
+                <td>{{ snapshot.city }}</td>
+                <td class="num mono">{{ snapshot.listing_count }}</td>
+                <td class="num mono">{{ snapshot.median_price|money:currency }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
