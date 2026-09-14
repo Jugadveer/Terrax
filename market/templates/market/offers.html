@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Offers{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Offers</h1>
+    <p>Everything you have offered, and everything offered to you.</p>
+  </header>
+
+  <nav class="tabs" style="margin-bottom: var(--s-5)">
+    <a class="tab {% if tab == 'received' %}is-active{% endif %}" href="?tab=received">
+      Received <span class="count">{{ counts.received }}</span>
+    </a>
+    <a class="tab {% if tab == 'made' %}is-active{% endif %}" href="?tab=made">
+      Made <span class="count">{{ counts.made }}</span>
+    </a>
+    <a class="tab {% if tab == 'all' %}is-active{% endif %}" href="?tab=all">All</a>
+  </nav>
+
+  <div class="panel">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>{% if tab == 'received' %}From{% else %}Seller{% endif %}</th>
+            <th class="num">Offer</th>
+            <th class="num">Against asking</th>
+            <th>Status</th>
+            <th>Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for offer in offers %}
+            <tr>
+              <td>
+                <a href="{{ offer.listing.get_absolute_url }}" style="font-weight: 520">
+                  {{ offer.listing.title|truncatechars:34 }}
+                </a>
+                <div class="subtle" style="font-size: var(--text-xs)">
+                  {{ offer.listing.location_label }}
+                </div>
+              </td>
+              <td>
+                {% if offer.listing.owner_id == user.id %}
+                  {{ offer.buyer.profile.name }}
+                {% else %}
+                  {{ offer.listing.owner.profile.name }}
+                {% endif %}
+              </td>
+              <td class="num mono">{{ offer.amount|money:currency }}</td>
+              <td class="num mono {{ offer.gap_to_asking|delta_class }}">
+                {{ offer.gap_to_asking|percent_signed }}
+              </td>
+              <td><span class="badge badge--{{ offer.tone }}">{{ offer.get_status_display }}</span></td>
+              <td class="subtle mono" style="font-size: var(--text-xs)">{{ offer.updated_at|ago }}</td>
+              <td>
+                <a class="btn btn--quiet btn--sm" href="{% url 'market:offer_detail' offer.public_id %}">
+                  Open {% icon "arrow-right" "icon icon--sm" %}
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7">
+                <div class="empty">
+                  {% icon "handshake" "icon" %}
+                  <h3>No offers here</h3>
+                  <p>
+                    {% if tab == 'received' %}
+                      Nobody has offered on your listings yet. Listings with
+                      complete documents and a price near their valuation get
+                      offers soonest.
+                    {% else %}
+                      Find something you like and use the offer panel on its
+                      page. Offers stay open for seven days.
+                    {% endif %}
+                  </p>
+                  <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}">Browse the market</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

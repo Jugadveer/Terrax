@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}Offer on {{ offer.listing.title }}{% endblock %}
+
+{% block content %}
+<div class="page page--narrow" style="padding-block: var(--s-6) var(--s-8)">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="{% url 'market:offers' %}">Offers</a>
+    <span class="sep">/</span>
+    <span>{{ offer.listing.title|truncatechars:38 }}</span>
+  </nav>
+
+  <header class="panel panel--pad" style="margin: var(--s-4) 0 var(--s-6)">
+    <div class="row row--between row--top">
+      <div class="row row--top">
+        {% with cover=offer.listing.cover_image %}
+          {% if cover %}
+            <img src="{{ cover.display_url }}" alt="" width="96" height="72" loading="lazy"
+                 style="border-radius: var(--r-sm); object-fit: cover; width: 96px; height: 72px">
+          {% endif %}
+        {% endwith %}
+        <div>
+          <h1 style="font-size: var(--text-lg)">
+            <a href="{{ offer.listing.get_absolute_url }}">{{ offer.listing.title }}</a>
+          </h1>
+          <p class="listing-meta" style="margin-top: var(--s-1)">
+            {% icon "map-pin" "icon icon--sm" %} {{ offer.listing.location_label }}
+          </p>
+        </div>
+      </div>
+      <span class="badge badge--{{ offer.tone }}">{{ offer.get_status_display }}</span>
+    </div>
+
+    <div class="kv" style="margin-top: var(--s-5)">
+      <div>
+        <span class="k">Current offer</span>
+        <span class="v mono">{{ offer.amount|money:currency }}</span>
+      </div>
+      <div>
+        <span class="k">Asking price</span>
+        <span class="v mono">{{ offer.listing.asking_price|money:currency }}</span>
+      </div>
+      <div>
+        <span class="k">Difference</span>
+        <span class="v mono {{ offer.gap_to_asking|delta_class }}">{{ offer.gap_to_asking|percent_signed }}</span>
+      </div>
+      <div>
+        <span class="k">{% if offer.is_open %}Expires{% else %}Closed{% endif %}</span>
+        <span class="v">
+          {% if offer.is_open %}{{ offer.expires_at|ago }}{% else %}{{ offer.responded_at|ago }}{% endif %}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <div class="stack stack--loose">
+    <section class="panel">
+      <div class="panel-head"><h3>The negotiation</h3></div>
+      <div class="panel-body">
+        <div class="thread">
+          {% for event in events %}
+            <article class="thread-item {% if event.actor_id == user.id %}is-mine{% endif %}">
+              <span class="avatar" aria-hidden="true">
+                {{ event.actor.profile.name|default:"System"|initials }}
+              </span>
+              <div>
+                <div class="body">
+                  <strong style="font-size: var(--text-xs)">
+                    {{ event.actor.profile.name|default:"Basix" }} &middot; {{ event.get_kind_display }}
+                  </strong>
+                  {% if event.amount %}
+                    <div class="amount">{{ event.amount|money:currency }}</div>
+                  {% endif %}
+                  {% if event.body %}<p style="margin-top: var(--s-1)">{{ event.body }}</p>{% endif %}
+                </div>
+                <div class="when">{{ event.created_at|ago }}</div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    {% if offer.is_open %}
+      <section class="panel panel--pad stack">
+        <h3 style="font-size: var(--text-base)">Respond</h3>
+
+        {% if is_seller %}
+          <div class="row row--wrap">
+            <form method="post" action="{% url 'market:respond' offer.public_id 'accept' %}"
+                  data-confirm="Accept this offer? Every other offer on the listing will close.">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--solid">
+                {% icon "check" "icon icon--sm" %} Accept {{ offer.amount|money:currency }}
+              </button>
+            </form>
+            <form method="post" action="{% url 'market:respond' offer.public_id 'decline' %}"
+                  data-confirm="Decline this offer?">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--danger">Decline</button>
+            </form>
+          </div>
+
+          <form method="post" action="{% url 'market:respond' offer.public_id 'counter' %}"
+                class="stack stack--tight" style="border-top: 1px solid var(--line); padding-top: var(--s-4)"
+                data-guard>
+            {% csrf_token %}
+            {% include "partials/field.html" with field=counter_form.amount %}
+            {% include "partials/field.html" with field=counter_form.message %}
+            <div class="row row--end">
+              <button type="submit" class="btn btn--outline">Send a counter offer</button>
+            </div>
+          </form>
+        {% else %}
+          <div class="row row--wrap">
+            <form method="post" action="{% url 'market:respond' offer.public_id 'withdraw' %}"
+                  data-confirm="Withdraw this offer?">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--danger">Withdraw the offer</button>
+            </form>
+          </div>
+
+          <form method="post" action="{% url 'market:respond' offer.public_id 'counter' %}"
+                class="stack stack--tight" style="border-top: 1px solid var(--line); padding-top: var(--s-4)"
+                data-guard>
+            {% csrf_token %}
+            {% include "partials/field.html" with field=counter_form.amount %}
+            {% include "partials/field.html" with field=counter_form.message %}
+            <div class="row row--end">
+              <button type="submit" class="btn btn--outline">Revise my offer</button>
+            </div>
+          </form>
+        {% endif %}
+
+        <form method="post" action="{% url 'market:respond' offer.public_id 'message' %}"
+              class="stack stack--tight" style="border-top: 1px solid var(--line); padding-top: var(--s-4)">
+          {% csrf_token %}
+          {% include "partials/field.html" with field=message_form.body %}
+          <div class="row row--end">
+            <button type="submit" class="btn btn--quiet">Send a message</button>
+          </div>
+        </form>
+      </section>
+    {% else %}
+      <div class="alert alert--info">
+        {% icon "info" "icon icon--sm" %}
+        <span>
+          This offer is {{ offer.get_status_display|lower }}, so it can no longer
+          be changed. The thread stays here as a record.
+        </span>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

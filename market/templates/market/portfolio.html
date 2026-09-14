@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load basix humanize %}
+
+{% block title %}Portfolio{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Portfolio</h1>
+    <p>
+      Every share you hold, what you paid for it, and what it is worth at the
+      current share price.
+    </p>
+  </header>
+
+  <div class="stat-strip" style="margin-bottom: var(--s-6)">
+    <div class="stat">
+      <span class="k">Current value</span>
+      <span class="v">{{ value|money:currency }}</span>
+      <span class="delta {{ gain|delta_class }}">
+        {{ gain|money:currency }} ({{ gain_percent|percent_signed }})
+      </span>
+    </div>
+    <div class="stat">
+      <span class="k">Invested</span>
+      <span class="v">{{ invested|money:currency }}</span>
+      <span class="delta subtle">across {{ property_count }} propert{{ property_count|pluralize:"y,ies" }}</span>
+    </div>
+    <div class="stat">
+      <span class="k">Payouts received</span>
+      <span class="v">{{ payouts|money:currency }}</span>
+      <span class="delta subtle">from shares sold in your listings</span>
+    </div>
+    <div class="stat">
+      <span class="k">Ledger entries</span>
+      <span class="v">{{ ledger|length }}</span>
+      <a class="delta" href="{% url 'market:activity' %}">Full history</a>
+    </div>
+  </div>
+
+  {% if holdings %}
+    <div class="dash-layout">
+      <section class="panel">
+        <div class="panel-head"><h3>Holdings</h3></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th class="num">Shares</th>
+                <th class="num">Owned</th>
+                <th class="num">Average cost</th>
+                <th class="num">Value</th>
+                <th class="num">Gain</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for holding in holdings %}
+                <tr>
+                  <td>
+                    <a href="{{ holding.listing.get_absolute_url }}" style="font-weight: 520">
+                      {{ holding.listing.title|truncatechars:30 }}
+                    </a>
+                    <div class="subtle" style="font-size: var(--text-xs)">
+                      {{ holding.listing.location_label }}
+                    </div>
+                  </td>
+                  <td class="num mono">{{ holding.shares|intcomma }}</td>
+                  <td class="num mono">{{ holding.ownership_percent }}%</td>
+                  <td class="num mono">{{ holding.average_cost|money:currency }}</td>
+                  <td class="num mono">{{ holding.current_value|money:currency }}</td>
+                  <td class="num mono {{ holding.gain|delta_class }}">
+                    {{ holding.gain_percent|percent_signed }}
+                  </td>
+                  <td>
+                    <form method="post" action="{% url 'market:sell_shares' holding.listing.public_id %}"
+                          class="row" style="gap: var(--s-2)" data-guard>
+                      {% csrf_token %}
+                      <label class="sr-only" for="sell-{{ holding.id }}">Shares to sell</label>
+                      <input class="input mono" id="sell-{{ holding.id }}" type="number" name="shares"
+                             min="1" max="{{ holding.shares }}" value="{{ holding.shares }}"
+                             style="width: 88px; height: 32px; font-size: var(--text-xs)">
+                      <button type="submit" class="btn btn--outline btn--sm">Sell</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="stack">
+        <div class="panel panel--pad">
+          <span class="label">By city</span>
+          <div class="allocation" style="margin-top: var(--s-3)"
+               role="img" aria-label="Portfolio split by city">
+            {% for row in allocation_city %}
+              <span style="width: {{ row.percent }}%; background: {{ row.colour }}"></span>
+            {% endfor %}
+          </div>
+          <div class="allocation-key">
+            {% for row in allocation_city %}
+              <div>
+                <span class="swatch" style="background: {{ row.colour }}"></span>
+                <span>{{ row.label }}</span>
+                <span class="pct">{{ row.percent|floatformat:0 }}%</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="panel panel--pad">
+          <span class="label">By property type</span>
+          <div class="allocation" style="margin-top: var(--s-3)"
+               role="img" aria-label="Portfolio split by property type">
+            {% for row in allocation_type %}
+              <span style="width: {{ row.percent }}%; background: {{ row.colour }}"></span>
+            {% endfor %}
+          </div>
+          <div class="allocation-key">
+            {% for row in allocation_type %}
+              <div>
+                <span class="swatch" style="background: {{ row.colour }}"></span>
+                <span>{{ row.label }}</span>
+                <span class="pct">{{ row.percent|floatformat:0 }}%</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Recent movements</h3></div>
+          <div class="panel-body" style="padding-block: var(--s-2)">
+            {% for entry in ledger|slice:":6" %}
+              <div class="comp-row">
+                <div>
+                  <span style="font-size: var(--text-sm)">{{ entry.get_kind_display }}</span>
+                  <div class="subtle" style="font-size: var(--text-xs)">
+                    {{ entry.description|truncatechars:34 }}
+                  </div>
+                </div>
+                <div style="text-align: right">
+                  <div class="mono {{ entry.amount|delta_class }}">{{ entry.amount|money:currency }}</div>
+                  <div class="weight">{{ entry.created_at|ago }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </aside>
+    </div>
+  {% else %}
+    <div class="empty panel">
+      {% icon "chart-pie-slice" "icon" %}
+      <h3>No holdings yet</h3>
+      <p>
+        Properties marked as fractional can be bought a share at a time. The
+        share price, and how many are left, are shown on each listing.
+      </p>
+      <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}?fractional=on">
+        Find fractional listings
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

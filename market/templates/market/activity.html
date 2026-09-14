@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load basix humanize %}
+
+{% block title %}Transaction history{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-block: var(--s-6) var(--s-8)">
+  <header class="page-header" style="padding-top: 0">
+    <h1>Transaction history</h1>
+    <p>Every movement on your account, newest first.</p>
+  </header>
+
+  <div class="panel">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Type</th>
+            <th>Detail</th>
+            <th>Property</th>
+            <th class="num">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr>
+              <td class="subtle mono" style="font-size: var(--text-xs)">
+                {{ entry.created_at|date:"d M Y, H:i" }}
+              </td>
+              <td><span class="badge badge--outline">{{ entry.get_kind_display }}</span></td>
+              <td>{{ entry.description }}</td>
+              <td>
+                {% if entry.listing %}
+                  <a href="{{ entry.listing.get_absolute_url }}">{{ entry.listing.title|truncatechars:26 }}</a>
+                {% else %}
+                  <span class="subtle">-</span>
+                {% endif %}
+              </td>
+              <td class="num mono {{ entry.amount|delta_class }}">{{ entry.amount|money:currency }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="empty">
+                  {% icon "stack" "icon" %}
+                  <h3>Nothing here yet</h3>
+                  <p>Buying or selling shares writes a line to this ledger.</p>
+                  <a class="btn btn--solid btn--sm" href="{% url 'properties:index' %}?fractional=on">
+                    Find fractional listings
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if trades %}
+    <section style="margin-top: var(--s-7)">
+      <div class="section-head"><h2>Share purchases</h2></div>
+      <div class="panel table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th class="num">Shares</th>
+              <th class="num">Price each</th>
+              <th class="num">Total</th>
+              <th>Reference</th>
+              <th>When</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for trade in trades %}
+              <tr>
+                <td>
+                  <a href="{{ trade.listing.get_absolute_url }}">{{ trade.listing.title|truncatechars:30 }}</a>
+                </td>
+                <td class="num mono">{{ trade.shares|intcomma }}</td>
+                <td class="num mono">{{ trade.price_per_share|money:currency }}</td>
+                <td class="num mono">{{ trade.total|money:currency }}</td>
+                <td class="mono subtle" style="font-size: var(--text-xs)">
+                  {{ trade.public_id|stringformat:"s"|slice:":8" }}
+                </td>
+                <td class="subtle mono" style="font-size: var(--text-xs)">{{ trade.created_at|ago }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
