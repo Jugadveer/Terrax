@@ -1,0 +1,33 @@
+{% load basix %}
+{% comment %}
+  The answer to one question: do the documents on this page still hash to what
+  the contract recorded? Swapped in by HTMX, so the listing page never waits on
+  a node to render.
+{% endcomment %}
+
+{% if not result.checked %}
+  <div class="alert alert--neutral">
+    {% icon "info" "icon icon--sm" %}
+    <span>Could not check: {{ result.reason }}.</span>
+  </div>
+
+{% elif result.matches %}
+  <div class="alert alert--success">
+    {% icon "seal-check" "icon icon--sm" %}
+    <span>
+      The documents and valuation on this page hash to exactly what
+      {{ token.get_chain_display }} recorded in block {{ token.block_number }}.
+    </span>
+  </div>
+
+{% else %}
+  <div class="alert alert--warning">
+    {% icon "warning" "icon icon--sm" %}
+    <span>
+      This listing has changed since it was recorded. The evidence now hashes to
+      <span class="mono">{{ result.expected|slice:":10" }}...</span>, and the
+      contract holds <span class="mono">{{ result.recorded|slice:":10" }}...</span>
+      Re-recording writes the new hash without erasing the old one.
+    </span>
+  </div>
+{% endif %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load basix %}
+
+{% block title %}What is recorded on chain{% endblock %}
+{% block description %}The two contracts Basix deploys, what they store, and why the documents themselves stay off chain.{% endblock %}
+
+{% block content %}
+<div class="page page--narrow">
+  <header class="page-header">
+    <h1>What goes on chain</h1>
+    <p>
+      Not the documents. A property's paperwork stays off chain, because
+      publishing scans of a title deed would be expensive and a privacy failure
+      at the same time. What is recorded is the pair that makes the paperwork
+      checkable: where it is published, and a hash of it.
+    </p>
+  </header>
+
+  <div class="panel panel--pad" style="margin-bottom: var(--s-7)">
+    <div class="row row--between row--wrap">
+      <div>
+        <span class="label">Chain</span>
+        <div class="row" style="margin-top: var(--s-2)">
+          {% if configured %}
+            <span class="badge badge--gain">{% icon "check" "icon icon--sm" %} {{ chain_name }}</span>
+            <span class="mono subtle" style="font-size: var(--text-xs)">{{ issuer }}</span>
+          {% else %}
+            <span class="badge badge--neutral">Not configured</span>
+            <span class="subtle" style="font-size: var(--text-xs)">
+              Records are kept locally and labelled as local
+            </span>
+          {% endif %}
+        </div>
+      </div>
+      <div style="text-align: right">
+        <span class="label">Recorded</span>
+        <div class="mono" style="margin-top: var(--s-2); font-size: var(--text-lg)">
+          {{ recorded }} / {{ total }}
+        </div>
+      </div>
+    </div>
+
+    {% if configured %}
+      <div class="stack stack--tight" style="margin-top: var(--s-5)">
+        {% for contract in contracts %}
+          <div class="row row--between">
+            <span>{{ contract.name }}</span>
+            <span class="row" style="gap: var(--s-3)">
+              <span class="subtle mono" style="font-size: var(--text-xs)">
+                {{ contract.size|floatformat:0 }} bytes
+              </span>
+              <a class="mono" href="{{ contract.url }}" target="_blank" rel="noopener noreferrer">
+                {{ contract.address|slice:":10" }}...
+              </a>
+            </span>
+          </div>
+        {% endfor %}
+        <div class="row row--between">
+          <span class="subtle">Issuer balance</span>
+          <span class="mono">{{ balance|floatformat:4 }}</span>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <section class="faq-group">
+    <h2>The two contracts</h2>
+
+    <div class="faq-item">
+      <h3>PropertyDeed, an ERC-721</h3>
+      <p>
+        One token per verified property. It stores an IPFS identifier for the
+        evidence bundle and a keccak256 hash of that bundle. Only the issuer can
+        record a property, because Basix checks documents and identity before a
+        listing publishes, and an open mint would let anyone record a property
+        nobody checked and inherit the credibility of the ones that were.
+      </p>
+      <p>
+        A re-valuation calls <span class="mono">updateEvidence</span>, which
+        writes a new hash and leaves the previous one in the event log. The
+        history is not rewritten, only extended.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>PropertyShares, an ERC-1155</h3>
+      <p>
+        Fractional ownership. The token id is the deed's token id, so a share
+        and the property it is a share of are joined by the number rather than
+        by a lookup table that can drift. The supply is fixed when the pool
+        opens and cannot be raised, because raising it after people have bought
+        in dilutes them silently.
+      </p>
+      <p>
+        This mirrors the ledger the rest of the site keeps.
+        <span class="mono">issue</span> is the primary sale a buyer makes, and
+        <span class="mono">redeem</span> is the exit. The invariant the Python
+        tests assert, that issued shares never exceed the supply, is enforced
+        here by the contract rather than by convention.
+      </p>
+    </div>
+
+    <h2>Checking a listing yourself</h2>
+
+    <div class="faq-item">
+      <h3>Three steps, no special tools</h3>
+      <p>
+        Fetch the bundle from its IPFS identifier. Serialise it with sorted keys
+        and no whitespace. Take the keccak256 of those bytes, and compare it
+        against what the contract holds for that deed.
+      </p>
+      <p>
+        Change one document, one figure or one word and the hashes stop
+        matching. The verify button on every recorded listing runs exactly this.
+      </p>
+    </div>
+
+    <div class="faq-item">
+      <h3>What this does not prove</h3>
+      <p>
+        That a document is genuine, that the seller owns the property, or that
+        the valuation is right. It proves only that what you are being shown now
+        is what was recorded then. Everything else is what the document checks,
+        the risk score and the identity review are for, and those are judgements
+        rather than proofs.
+      </p>
+    </div>
+  </section>
+</div>
+{% endblock %}
