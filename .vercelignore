@@ -1,0 +1,14 @@
+# Nothing below is needed to serve a request, and the function bundle has a
+# size limit worth staying well inside.
+.venv311/
+venv/
+.claude/
+docs/
+tests/
+media/
+db.sqlite3
+*.md
+!README.md
+.ruff_cache/
+.pytest_cache/
+__pycache__/

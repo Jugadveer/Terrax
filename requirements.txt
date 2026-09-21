@@ -1,0 +1,29 @@
+Django==5.2.17
+python-decouple==3.8
+requests==2.34.2
+Pillow==12.3.0
+whitenoise==6.11.0
+
+# Chain. Optional at runtime: with no RPC URL and no key the site runs and
+# every record stays local. `web3` is imported inside the functions that need
+# it, so a request that never touches a chain never pays for loading it.
+web3==8.0.0
+py-solc-x==2.0.5
+
+# Deployment. SQLite and the local filesystem are the defaults; these are what
+# a host without a writable disk needs instead, and both are inert until their
+# environment variable is set.
+dj-database-url==3.1.2
+psycopg[binary]==3.3.6
+cloudinary==1.46.2
+django-cloudinary-storage==0.3.0
+
+# Development and test only.
+pytest==9.0.2
+pytest-django==4.13.2
+ruff==0.15.4
+
+# An in-memory EVM, so the Solidity is executed by the test suite rather than
+# mocked. Not imported by the application.
+eth-tester==0.14.0b1
+py-evm==0.12.1b1
