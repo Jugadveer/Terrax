@@ -56,8 +56,8 @@ contract PropertyShares {
     /// @notice Emitted when a property is first opened for fractional sale.
     event PoolOpened(uint256 indexed deedId, uint256 supply);
 
-    string public constant name = "Basix Property Shares";
-    string public constant symbol = "BSXS";
+    string public constant name = "Terrax Property Shares";
+    string public constant symbol = "TRXS";
 
     address public issuer;
 

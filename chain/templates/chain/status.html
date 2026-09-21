@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load basix %}
+{% load terrax %}
 
 {% block title %}What is recorded on chain{% endblock %}
-{% block description %}The two contracts Basix deploys, what they store, and why the documents themselves stay off chain.{% endblock %}
+{% block description %}The two contracts Terrax deploys, what they store, and why the documents themselves stay off chain.{% endblock %}
 
 {% block content %}
 <div class="page page--narrow">
@@ -71,7 +71,7 @@
       <p>
         One token per verified property. It stores an IPFS identifier for the
         evidence bundle and a keccak256 hash of that bundle. Only the issuer can
-        record a property, because Basix checks documents and identity before a
+        record a property, because Terrax checks documents and identity before a
         listing publishes, and an open mint would let anyone record a property
         nobody checked and inherit the credibility of the ones that were.
       </p>

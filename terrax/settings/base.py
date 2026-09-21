@@ -3,7 +3,7 @@ Settings shared by every environment.
 
 Split into base/dev/prod so that a missing production secret can never be
 silently papered over by a development default. `manage.py` and `wsgi.py`
-point at `basix.settings.dev` and `basix.settings.prod` respectively.
+point at `terrax.settings.dev` and `terrax.settings.prod` respectively.
 """
 
 from pathlib import Path
@@ -39,8 +39,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "basix.urls"
-WSGI_APPLICATION = "basix.wsgi.application"
+ROOT_URLCONF = "terrax.urls"
+WSGI_APPLICATION = "terrax.wsgi.application"
 
 TEMPLATES = [
     {
@@ -122,7 +122,7 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "basix",
+        "LOCATION": "terrax",
         "TIMEOUT": 300,
     }
 }

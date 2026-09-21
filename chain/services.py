@@ -54,7 +54,7 @@ def build_metadata(listing) -> dict[str, Any]:
     valuation = listing.valuations.first()
 
     return {
-        "schema": "basix/listing/1",
+        "schema": "terrax/listing/1",
         "id": str(listing.public_id),
         "title": listing.title,
         "summary": listing.summary,
@@ -166,7 +166,7 @@ def pin_listing(listing) -> PinRecord | None:
             f"{settings.PINATA_BASE_URL}/pinJSONToIPFS",
             json={
                 "pinataContent": metadata,
-                "pinataMetadata": {"name": f"basix-{listing.public_id}"},
+                "pinataMetadata": {"name": f"terrax-{listing.public_id}"},
             },
             headers=_headers(),
             timeout=TIMEOUT,
@@ -234,7 +234,7 @@ def publish_to_chain(listing) -> dict[str, Any]:
 
     token, _ = TokenRecord.objects.get_or_create(
         listing=listing,
-        defaults={"token_id": f"BSX-{listing.pk:05d}", "chain": TokenRecord.Chain.LOCAL},
+        defaults={"token_id": f"TRX-{listing.pk:05d}", "chain": TokenRecord.Chain.LOCAL},
     )
     if pin:
         token.metadata_cid = pin.cid
@@ -266,7 +266,7 @@ def record_on_chain(listing) -> TokenRecord:
 
     token, _ = TokenRecord.objects.get_or_create(
         listing=listing,
-        defaults={"token_id": f"BSX-{listing.pk:05d}", "chain": TokenRecord.Chain.LOCAL},
+        defaults={"token_id": f"TRX-{listing.pk:05d}", "chain": TokenRecord.Chain.LOCAL},
     )
     contract = client.deed()
 

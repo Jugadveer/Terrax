@@ -1,4 +1,4 @@
-# Basix rebuild plan
+# Terrax rebuild plan
 
 Written 2026-09-17, after a full hands-on audit of the running site.
 
@@ -123,7 +123,7 @@ token or minting code.** The word "AI" appears only in prose.
 The redesign brief is a full overhaul of the visual language with the content and brand
 preserved. Three anti-slop constraints drive the choices:
 
-**Palette: Forest.** Deep green, bone, single amber accent. This keeps Basix recognisably
+**Palette: Forest.** Deep green, bone, single amber accent. This keeps Terrax recognisably
 green (the existing brand) while avoiding the two most common AI fingerprints: the
 purple/blue gradient, and the beige-plus-brass "premium consumer" default. One accent,
 locked across the whole page. Saturation held under 80%. Shadows tinted to the surface
@@ -158,7 +158,7 @@ are reorganised so each has one job, and every template and view is rewritten fr
 scratch rather than patched.
 
 ```
-basix/          settings split into base / dev / prod, root urls
+terrax/          settings split into base / dev / prod, root urls
 core/           base layout, design tokens, context processors, error pages, health check
 accounts/       profile, KYC, wallet, notifications, saved searches, settings
 properties/     Listing, media, documents, wizard, detail, search and filtering

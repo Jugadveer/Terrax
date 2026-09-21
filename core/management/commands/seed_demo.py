@@ -211,8 +211,8 @@ class Command(BaseCommand):
                 f"\nSeeded {len(listings)} listings across "
                 f"{len({listing.city for listing in listings})} cities, "
                 f"{len(users)} accounts.\n"
-                "Sign in as  aarav.mehta / demo-basix-2026\n"
-                "Admin       admin / demo-basix-2026\n"
+                "Sign in as  aarav.mehta / demo-terrax-2026\n"
+                "Admin       admin / demo-terrax-2026\n"
             )
         )
 
@@ -240,7 +240,7 @@ class Command(BaseCommand):
                 defaults={"email": f"{username}@example.in", "first_name": name.split()[0]},
             )
             if created:
-                user.set_password("demo-basix-2026")
+                user.set_password("demo-terrax-2026")
                 user.save()
 
             profile: Profile = user.profile
@@ -502,7 +502,7 @@ class Command(BaseCommand):
             defaults={"email": "admin@example.in", "is_staff": True, "is_superuser": True},
         )
         if created:
-            admin.set_password("demo-basix-2026")
+            admin.set_password("demo-terrax-2026")
             admin.save()
         admin.profile.display_name = "Platform admin"
         admin.profile.kyc_status = KycStatus.VERIFIED

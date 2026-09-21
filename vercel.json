@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python manage.py collectstatic --noinput --settings=basix.settings.prod",
+  "buildCommand": "python manage.py collectstatic --noinput --settings=terrax.settings.prod",
   "builds": [
     {
       "src": "api/index.py",

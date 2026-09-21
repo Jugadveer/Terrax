@@ -13,7 +13,7 @@ interface IERC721Receiver {
  * @notice One non-fungible token per verified property, carrying the address of
  *         its evidence rather than the evidence itself.
  *
- * A listing on Basix is only worth anything because of its paperwork: a title
+ * A listing on Terrax is only worth anything because of its paperwork: a title
  * deed, a tax receipt, an encumbrance certificate, and a valuation derived from
  * comparable sales. All of that lives off chain, because putting scans of a
  * private title deed on a public ledger would be both expensive and a privacy
@@ -45,8 +45,8 @@ contract PropertyDeed {
     /// @notice Emitted when a re-valuation or a new document replaces the bundle.
     event EvidenceUpdated(uint256 indexed tokenId, string metadataCID, bytes32 evidenceHash);
 
-    string public constant name = "Basix Property Deed";
-    string public constant symbol = "BSXD";
+    string public constant name = "Terrax Property Deed";
+    string public constant symbol = "TRXD";
 
     address public issuer;
     uint256 public totalMinted;
@@ -90,7 +90,7 @@ contract PropertyDeed {
      * @param evidenceHash keccak256 over the document checksums and valuation
      * @return tokenId     sequential, starting at 1
      *
-     * Only the issuer can mint. Basix verifies documents and identity before a
+     * Only the issuer can mint. Terrax verifies documents and identity before a
      * listing is published, so an open mint would let anyone record a property
      * that nobody checked and inherit the credibility of the ones that were.
      */

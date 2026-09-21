@@ -277,7 +277,7 @@ def test_the_metadata_snapshot_carries_the_evidence(documented_listing, comparab
 
     metadata = chain.build_metadata(documented_listing)
 
-    assert metadata["schema"] == "basix/listing/1"
+    assert metadata["schema"] == "terrax/listing/1"
     assert metadata["id"] == str(documented_listing.public_id)
     assert metadata["valuation"]["method"] == "comparable-sales"
     assert len(metadata["documents"]) == 3

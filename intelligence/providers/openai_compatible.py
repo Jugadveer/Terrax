@@ -60,6 +60,6 @@ class OpenRouterProvider(OpenAICompatibleProvider):
     # OpenRouter asks callers to identify themselves; it also unlocks the
     # higher free-tier rate limit.
     extra_headers = {
-        "HTTP-Referer": "https://basix.local",
-        "X-Title": "Basix",
+        "HTTP-Referer": "https://terrax.local",
+        "X-Title": "Terrax",
     }

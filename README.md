@@ -1,4 +1,4 @@
-# Basix
+# Terrax
 
 A property marketplace where every listing carries its paperwork: the title
 deed, the tax receipt, a valuation calculated from comparable sales with the
@@ -18,7 +18,7 @@ python manage.py runserver
 ```
 
 Open <http://localhost:8000>. Sign in as `aarav.mehta` with the password
-`demo-basix-2026`, or as `admin` for the Django admin.
+`demo-terrax-2026`, or as `admin` for the Django admin.
 
 ---
 
@@ -75,7 +75,7 @@ one hundred, each shown with its points and the reason it fired.
 
 ## The language-model layer
 
-Basix runs with no API key. Every feature that can use a model has a local
+Terrax runs with no API key. Every feature that can use a model has a local
 implementation that runs instead, and the interface says which one produced the
 text.
 
@@ -110,7 +110,7 @@ imports a concrete provider; everything goes through `get_provider()`.
 ## Layout
 
 ```
-basix/          settings split into base / dev / prod
+terrax/          settings split into base / dev / prod
 core/           base layout, design tokens, dashboard, content pages, errors
 accounts/       profile, identity, wallet, watchlist, saved searches, notifications
 properties/     Listing, media, documents, the wizard, search and filtering
@@ -200,7 +200,7 @@ listing carries a button that runs exactly this against the live contract.
 
 ### PropertyDeed, an ERC-721
 
-One token per verified property. Only the issuer can `record`, because Basix
+One token per verified property. Only the issuer can `record`, because Terrax
 checks documents and identity before a listing publishes, and an open mint would
 let anyone record a property nobody checked and inherit the credibility of the
 ones that were. A re-valuation calls `updateEvidence`, which writes the new hash
@@ -316,8 +316,8 @@ changes on every preview build and so cannot be a literal.
 Then, once, from a machine that can reach the database:
 
 ```bash
-DATABASE_URL=... python manage.py migrate --settings=basix.settings.prod
-DATABASE_URL=... python manage.py seed_demo --settings=basix.settings.prod
+DATABASE_URL=... python manage.py migrate --settings=terrax.settings.prod
+DATABASE_URL=... python manage.py seed_demo --settings=terrax.settings.prod
 ```
 
 ### What the deployment was checked against
@@ -354,7 +354,7 @@ node never pays for loading one. Django's own start-up is around half a second.
 ```bash
 pytest          # 176 tests
 ruff check .
-python manage.py check --deploy --settings=basix.settings.prod
+python manage.py check --deploy --settings=terrax.settings.prod
 ```
 
 The suite covers the valuation engine (including the cross-city rebasing and the

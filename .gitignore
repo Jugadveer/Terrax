@@ -27,7 +27,7 @@ Thumbs.db
 .vscode/
 
 # Skill library imported from the bot project for this workspace; it is a copy
-# of a shared library, not part of Basix.
+# of a shared library, not part of Terrax.
 .claude/skills/
 
 # Snapshot of the database this rebuild replaced, kept locally for reference.

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static basix humanize %}
+{% load static terrax humanize %}
 
 {% block title %}{{ listing.title }}, {{ listing.location_label }}{% endblock %}
 {% block description %}{{ listing.summary|default:listing.description|truncatewords:28 }}{% endblock %}
@@ -654,7 +654,7 @@
           <p class="subtle" style="font-size: var(--text-2xs); margin-top: var(--s-3); line-height: 1.5">
             {% if listing.pins.exists %}
               The metadata above is pinned, so the documents behind this listing
-              can be checked without going through Basix.
+              can be checked without going through Terrax.
             {% else %}
               This build has no IPFS credentials configured, so the evidence is
               held locally rather than pinned. The token is a local registry

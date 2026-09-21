@@ -39,7 +39,7 @@ def sign_up(request: HttpRequest) -> HttpResponse:
         services.notify(
             user,
             kind="system",
-            title="Welcome to Basix",
+            title="Welcome to Terrax",
             body="Verify your identity to start listing or investing.",
             url="/account/identity/",
         )

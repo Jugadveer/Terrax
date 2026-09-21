@@ -14,7 +14,7 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
    Theme
    ------------------------------------------------------------------------- */
 
-const THEME_KEY = "basix-theme";
+const THEME_KEY = "terrax-theme";
 
 function currentTheme() {
   const set = document.documentElement.dataset.theme;
@@ -323,7 +323,7 @@ export function formatRupees(value) {
 
 function initCompare(root = document) {
   const tray = $("#compare-tray");
-  const KEY = "basix-compare";
+  const KEY = "terrax-compare";
 
   const read = () => {
     try {

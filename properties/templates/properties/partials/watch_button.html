@@ -1,4 +1,4 @@
-{% load basix %}
+{% load terrax %}
 {# Swapped in by HTMX after a watch toggle, so only this button repaints. #}
 <form method="post" action="{% url 'properties:watch' listing.public_id %}"
       hx-post="{% url 'properties:watch' listing.public_id %}"

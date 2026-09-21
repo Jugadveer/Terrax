@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "basix.settings.dev"
+DJANGO_SETTINGS_MODULE = "terrax.settings.dev"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
 addopts = "--tb=short -q"
@@ -18,4 +18,4 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["accounts", "basix", "chain", "core", "intelligence", "market", "properties"]
+known-first-party = ["accounts", "terrax", "chain", "core", "intelligence", "market", "properties"]

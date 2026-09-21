@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load basix %}
+{% load terrax %}
 
 {% block title %}Offer on {{ offer.listing.title }}{% endblock %}
 
@@ -67,7 +67,7 @@
               <div>
                 <div class="body">
                   <strong style="font-size: var(--text-xs)">
-                    {{ event.actor.profile.name|default:"Basix" }} &middot; {{ event.get_kind_display }}
+                    {{ event.actor.profile.name|default:"Terrax" }} &middot; {{ event.get_kind_display }}
                   </strong>
                   {% if event.amount %}
                     <div class="amount">{{ event.amount|money:currency }}</div>

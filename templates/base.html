@@ -1,4 +1,4 @@
-{% load static basix %}<!DOCTYPE html>
+{% load static terrax %}<!DOCTYPE html>
 <html lang="en" data-theme="{{ request.session.theme|default:theme_preference|default:'system' }}">
 <head>
   <meta charset="utf-8">
@@ -38,7 +38,7 @@
   <script>
     (function () {
       try {
-        var stored = localStorage.getItem('basix-theme');
+        var stored = localStorage.getItem('terrax-theme');
         if (stored) document.documentElement.dataset.theme = stored;
       } catch (e) {}
     })();

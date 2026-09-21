@@ -6,10 +6,10 @@ from django.conf import settings
 from django.http import HttpRequest
 
 SITE = {
-    "name": "Basix",
+    "name": "Terrax",
     "tagline": "Tokenised property, with the paperwork attached",
     "description": (
-        "Basix turns verified Indian property into tradeable digital shares. "
+        "Terrax turns verified Indian property into tradeable digital shares. "
         "Every listing carries its documents, an independent valuation, and a "
         "risk score you can audit."
     ),
