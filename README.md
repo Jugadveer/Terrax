@@ -363,10 +363,23 @@ application are a writable disk and a process that stays alive, and both are
 configured away rather than assumed.
 
 ```
-api/index.py     the object Vercel imports: Django's own WSGI application
-vercel.json      the build command and the single route
-.vercelignore    keeps the virtualenv, tests and media out of the bundle
+api/index.py              the object Vercel imports: Django's own WSGI application
+vercel.json               the install step, the build step, and the single rewrite
+terrax/settings/build.py  settings for collectstatic, which serves no request
+.vercelignore             keeps the virtualenv, tests, docs and seed photos out
 ```
+
+There is deliberately no `pyproject.toml`. Vercel's Python builder finds one,
+assumes a PEP 621 project and runs `uv lock`, which fails on a file that only
+carries tool configuration. Keeping pytest in `pytest.ini` and ruff in
+`ruff.toml` leaves `requirements.txt` as the single source of dependencies.
+
+`terrax/settings/build.py` exists because `collectstatic` needs settings that
+production refuses to provide. It reads templates and writes a manifest; it
+never signs a cookie, opens a connection or answers a request, so it supplies
+throwaway values for the three variables `prod.py` demands. The checks in
+`prod.py` still stop the site from *serving* when something real is missing,
+which is the point of them.
 
 | | Locally | Deployed |
 | --- | --- | --- |
@@ -375,10 +388,21 @@ vercel.json      the build command and the single route
 | Uploads | `media/` on disk | Cloudinary, from `CLOUDINARY_URL` |
 | Hostname | `*` | read from `VERCEL_URL` at startup |
 
-Set three environment variables in the Vercel project — `SECRET_KEY`,
-`DATABASE_URL`, `CLOUDINARY_URL` — and push. `ALLOWED_HOSTS` and
-`CSRF_TRUSTED_ORIGINS` are derived from the deployment's own hostname, which
-changes on every preview build and so cannot be a literal.
+Set these in the Vercel project, then push:
+
+| Variable | Required | |
+| --- | --- | --- |
+| `SECRET_KEY` | yes | any long random string |
+| `DATABASE_URL` | yes | a Postgres URL; Neon and Supabase both have a free tier |
+| `CLOUDINARY_URL` | for uploads | without it, new photographs have nowhere to land |
+
+`ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` are derived from the deployment's
+own hostname, which changes on every preview build and so cannot be a literal.
+
+A missing variable does not produce a blank `FUNCTION_INVOCATION_FAILED`.
+`api/index.py` catches `ImproperlyConfigured` and answers 503 with a page that
+names what is missing, because the alternative is a crash whose reason is
+buried in a log nobody has open.
 
 Then, once, from a machine that can reach the database:
 
