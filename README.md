@@ -1,17 +1,27 @@
-# Terrax
+<h1 align="center">Terrax</h1>
 
-A property marketplace where every listing carries its paperwork: the title
-deed, the tax receipt, a valuation calculated from comparable sales with the
-comparables shown, and a risk score you can read factor by factor.
+<p align="center">
+  <strong>Property you can check before you buy.</strong><br>
+  Every listing carries its title deed, its tax receipts, a valuation calculated<br>
+  from comparable sales with the comparables shown, and a risk score you can read<br>
+  factor by factor.
+</p>
 
-Django 5, hand-written CSS, HTMX, Solidity. No build step, no Node, no API keys
-required.
+<p align="center">
+  Django 5 &middot; HTMX &middot; hand-written CSS &middot; Solidity 0.8.28 &middot; SQLite or Postgres<br>
+  <sub>No build step. No Node. No API keys required.</sub>
+</p>
+
+![The landing page](docs/screenshots/01-home.jpg)
+
+---
+
+## Run it
 
 ```bash
 python -m venv .venv
 .venv/Scripts/activate          # source .venv/bin/activate on macOS and Linux
 pip install -r requirements.txt
-cp .env.example .env
 python manage.py migrate
 python manage.py seed_demo
 python manage.py runserver
@@ -19,6 +29,51 @@ python manage.py runserver
 
 Open <http://localhost:8000>. Sign in as `aarav.mehta` with the password
 `demo-terrax-2026`, or as `admin` for the Django admin.
+
+There is no `.env` step. A fresh clone generates a throwaway `SECRET_KEY`, runs
+every AI feature through a local implementation, and records every property in a
+local registry that the interface labels as local. Fill in `.env.example` only
+when you want a language model, IPFS pinning, or a chain.
+
+---
+
+## Contents
+
+| | |
+| --- | --- |
+| [What it does](#what-it-does) | the seller flow, the buyer flow, and the reason to come back |
+| [How the valuation works](#how-the-valuation-works) | comparable sales, in plain Python, with the workings shown |
+| [The language-model layer](#the-language-model-layer) | four providers, and why the model never decides a number |
+| [Layout](#layout) | six apps, thin views, rules in the service layer |
+| [Why there is no build step](#why-there-is-no-build-step) | what replaced a 400KB CSS compiler in the browser |
+| [The contracts](#the-contracts) | an ERC-721 deed and an ERC-1155 share pool, tested on a real EVM |
+| [Deploying](#deploying) | Vercel, and the two things a serverless host cannot give Django |
+| [Tests](#tests) | 176 of them, and what they cover |
+
+---
+
+## Three things worth a look
+
+**The valuation shows its working.** Not a number from a black box: three
+selection passes, similarity weights, cross-city rebasing, outlier trimming, and
+every adjustment named on the page. The interval widens with the scatter of the
+comparables and narrows with the square root of the sample size, so "low
+confidence" means something specific.
+
+![The valuation panel, with every comparable and its weight](docs/screenshots/04-valuation.jpg)
+
+**Nothing claims more than it can prove.** With no IPFS credentials and no chain
+configured, the provenance panel on the right says so in as many words —
+*"the token is a local registry entry, not a public chain transaction"* — rather
+than printing a plausible-looking hash. `TokenRecord.is_onchain` reads the
+transaction columns, never a label.
+
+**The ledger balances.** Every share purchase and sale writes both sides.
+A test asserts that every rupee in the ledger nets to zero once platform fees
+are excluded, which is how a real bug got caught: sales were crediting the
+seller without debiting anybody.
+
+![The portfolio, with cost basis and allocation](docs/screenshots/05-portfolio.jpg)
 
 ---
 
@@ -36,10 +91,14 @@ their own valuations. Watch a listing and hear about it when the price moves.
 Save a search and hear about new matches. Make an offer and negotiate in a
 thread both sides keep, or buy a fraction of a property one share at a time.
 
+![The marketplace, with filters and plain-language search](docs/screenshots/02-marketplace.jpg)
+
 **Every day.** The dashboard opens on what changed since the last visit: offers
 that moved, prices that moved on watched listings, listings that changed status,
 shares that settled. Nothing gamified, nothing invented. The reason to come back
 is that the state actually changed.
+
+![The dashboard, opening on what changed](docs/screenshots/06-dashboard.jpg)
 
 ---
 
@@ -156,7 +215,7 @@ What replaced it:
 | --- | --- | --- |
 | CSS | Compiled in the browser, every load | Four static files, cached immutably |
 | Fonts | Three static weights from Google Fonts | Two self-hosted variable files, 51KB total |
-| Icons | A 120KB webfont for twelve glyphs | One 33KB SVG sprite |
+| Icons | A 120KB webfont for twelve glyphs | One 22KB SVG sprite, 52 icons |
 | Filtering | Full page reload | HTMX swaps the results fragment |
 | Images | Remote originals, no dimensions | Local WebP thumbnails with explicit sizes |
 | Requests to third parties at runtime | Four, on every page | None, except map tiles on the map page |
@@ -169,11 +228,17 @@ button works. Without JavaScript it degrades to a plain GET form.
 Static files are served by WhiteNoise with `CompressedManifestStaticFilesStorage`,
 so filenames are content-hashed and can carry a one-year cache header.
 
-Measured on the marketplace with twelve listings on screen: 11 requests, 89KB
-over the wire, DOMContentLoaded at 59ms, and a cumulative layout shift of zero.
+Measured on the marketplace with fourteen listings rendered: **10 requests and
+37KB for the shell**, DOMContentLoaded at 106ms, a cumulative layout shift of
+zero, and no request to any third party. Photographs load lazily on top of that
+and carry explicit dimensions, which is why the shift stays at zero.
+
 Leaflet is vendored into `static/vendor/` and loaded only on the map page, so no
-other page pays for it. The only request that leaves the domain at runtime is
-for OpenStreetMap tiles, which needs a tile server by definition.
+other page pays for it. The only request that ever leaves the domain at runtime
+is for OpenStreetMap tiles, which needs a tile server by definition.
+
+The sprite ships only the icons the templates actually reference; a check over
+every page confirms no `<use>` points at a symbol that is not there.
 
 ---
 
@@ -197,6 +262,8 @@ Verification is therefore three steps with no special tools: fetch the bundle,
 serialise it with sorted keys and no whitespace, hash it, compare. Change one
 document, one figure or one word and the hashes stop matching. Every recorded
 listing carries a button that runs exactly this against the live contract.
+
+![A listing, with its provenance record in the sidebar](docs/screenshots/03-listing.jpg)
 
 ### PropertyDeed, an ERC-721
 
