@@ -116,9 +116,3 @@ def query_without(context, *keys) -> str:
         params.pop(key, None)
     encoded = params.urlencode()
     return mark_safe(f"?{encoded}" if encoded else "?")
-
-
-@register.filter
-def field_type(field) -> str:
-    """Widget class name, so templates can branch on input kind."""
-    return field.field.widget.__class__.__name__

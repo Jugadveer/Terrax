@@ -29,11 +29,6 @@ def notify(user, *, kind: str, title: str, body: str = "", url: str = "") -> Not
     )
 
 
-def notify_many(users, **kwargs) -> None:
-    for user in users:
-        notify(user, **kwargs)
-
-
 def mark_notifications_read(user, ids: list[int] | None = None) -> int:
     queryset = user.notifications.filter(read_at__isnull=True)
     if ids:
@@ -75,26 +70,6 @@ def submit_identity(profile) -> None:
         kind="kyc",
         title="Identity documents received",
         body="Verification usually completes within one working day.",
-    )
-
-
-def set_identity_status(profile, status: str, notes: str = "") -> None:
-    profile.kyc_status = status
-    profile.kyc_notes = notes[:300]
-    profile.kyc_reviewed_at = timezone.now()
-    profile.save(
-        update_fields=["kyc_status", "kyc_notes", "kyc_reviewed_at"]
-    )
-    notify(
-        profile.user,
-        kind="kyc",
-        title=(
-            "Identity verified"
-            if status == KycStatus.VERIFIED
-            else "Identity check needs attention"
-        ),
-        body=notes or "",
-        url="/account/identity/",
     )
 
 

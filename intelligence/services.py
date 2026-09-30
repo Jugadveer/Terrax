@@ -16,7 +16,6 @@ import re
 from decimal import Decimal
 
 from django.core.cache import cache
-from django.utils import timezone
 
 from intelligence import prompts
 from intelligence.engine import comparables, documents, risk
@@ -571,7 +570,3 @@ def _clean(text: str) -> str:
 def _cache_key(*parts) -> str:
     raw = "|".join(str(p) for p in parts)
     return f"intel:{hashlib.sha256(raw.encode()).hexdigest()[:24]}"
-
-
-def stale_before(hours: int = 24):
-    return timezone.now() - timezone.timedelta(hours=hours)

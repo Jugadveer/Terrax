@@ -187,35 +187,6 @@ def pin_listing(listing) -> PinRecord | None:
     )
 
 
-def pin_file(listing, django_file, *, kind: str, label: str) -> PinRecord | None:
-    """Pin one image or document alongside the metadata that references it."""
-    if not is_pinning_configured():
-        return None
-
-    try:
-        django_file.seek(0)
-        response = requests.post(
-            f"{settings.PINATA_BASE_URL}/pinFileToIPFS",
-            files={"file": (label, django_file)},
-            headers=_headers(),
-            timeout=TIMEOUT,
-        )
-        response.raise_for_status()
-        cid = response.json()["IpfsHash"]
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("pinning %s failed for listing %s: %s", label, listing.pk, exc)
-        return None
-
-    return PinRecord.objects.create(
-        listing=listing,
-        kind=kind,
-        cid=cid,
-        label=label,
-        size_bytes=getattr(django_file, "size", 0) or 0,
-        provider="pinata",
-    )
-
-
 # ---------------------------------------------------------------------------
 # Recording
 # ---------------------------------------------------------------------------

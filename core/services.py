@@ -11,7 +11,6 @@ from decimal import Decimal
 
 from django.core.cache import cache
 from django.db.models import Avg, Count, Sum
-from django.utils import timezone
 
 from market.models import Holding, LedgerEntry, Offer, Trade
 from properties.constants import ListingStatus
@@ -213,7 +212,3 @@ def recent_cities(limit: int = 6) -> list[dict]:
         .annotate(count=Count("id"), value=Sum("asking_price"))
         .order_by("-count")[:limit]
     )
-
-
-def stale_drafts_cutoff():
-    return timezone.now() - timezone.timedelta(days=30)

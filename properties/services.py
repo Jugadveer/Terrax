@@ -248,12 +248,6 @@ def publish(listing, *, reviewer=None) -> Listing:
     return listing
 
 
-def unpublish(listing) -> Listing:
-    listing.status = C.ListingStatus.VERIFIED
-    listing.save(update_fields=["status", "updated_at"])
-    return listing
-
-
 def register_view(listing, request) -> None:
     """
     Count a view once per session, so a refresh does not inflate the number.
