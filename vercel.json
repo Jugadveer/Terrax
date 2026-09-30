@@ -1,15 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python manage.py collectstatic --noinput --settings=terrax.settings.prod",
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "35mb", "runtime": "python3.12" }
-    }
-  ],
-  "routes": [
-    { "src": "/static/(.*)", "dest": "/api/index.py" },
-    { "src": "/(.*)", "dest": "/api/index.py" }
+  "buildCommand": "python manage.py collectstatic --noinput --settings=terrax.settings.build",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
   ]
 }

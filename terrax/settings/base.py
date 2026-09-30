@@ -67,9 +67,15 @@ DATABASE_URL = config("DATABASE_URL", default="")
 if DATABASE_URL:
     import dj_database_url
 
+    # SSL is required of Postgres, which is what a managed database will be,
+    # and never of the others: SQLite's `connect()` has no `sslmode` argument
+    # and raises a TypeError if one arrives.
     DATABASES = {
         "default": dj_database_url.parse(
-            DATABASE_URL, conn_max_age=600, conn_health_checks=True, ssl_require=True
+            DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=DATABASE_URL.startswith(("postgres://", "postgresql://")),
         )
     }
 else:

@@ -1,21 +1,14 @@
-[tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "terrax.settings.dev"
-python_files = ["test_*.py"]
-testpaths = ["tests"]
-addopts = "--tb=short -q"
-
-[tool.ruff]
 line-length = 96
 target-version = "py311"
-exclude = ["*/migrations/*", "venv", ".venv311", ".claude", "staticfiles"]
+exclude = ["*/migrations/*", ".venv311", ".claude", "staticfiles"]
 
-[tool.ruff.lint]
+[lint]
 select = ["E", "F", "I", "UP", "B", "C4", "DJ"]
 ignore = [
-  "E501",   # line length is handled by the formatter
+  "E501",   # long lines are a judgement call, not a rule
   "B008",   # Django uses callables in defaults
   "DJ001",  # null=True on CharField is deliberate where a value is genuinely absent
 ]
 
-[tool.ruff.lint.isort]
+[lint.isort]
 known-first-party = ["accounts", "terrax", "chain", "core", "intelligence", "market", "properties"]

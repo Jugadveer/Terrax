@@ -21,6 +21,18 @@ SECRET_KEY = config("SECRET_KEY", default="")
 if not SECRET_KEY:
     raise ImproperlyConfigured("SECRET_KEY must be set in the environment.")
 
+# --- Database -------------------------------------------------------------
+# SQLite is the development default and cannot be the production one: the file
+# is not in the deployment, and the filesystem it would live on is read-only.
+# Saying so here turns a stack trace on the first query into one clear line in
+# the build log.
+if not DATABASE_URL:  # noqa: F405
+    raise ImproperlyConfigured(
+        "DATABASE_URL must be set in production. SQLite needs a writable disk, "
+        "which a serverless host does not have. Any Postgres URL works; Neon "
+        "and Supabase both have a free tier."
+    )
+
 # --- Hosts ----------------------------------------------------------------
 # Vercel supplies the deployment's own hostname, which changes with every
 # preview build, so it is read rather than listed.
