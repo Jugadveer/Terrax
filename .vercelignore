@@ -7,6 +7,11 @@ docs/
 tests/
 media/
 db.sqlite3
+requirements-dev.txt
+
+# Photographs for `seed_demo`, which runs from a developer machine against the
+# remote database. Nothing serves them, so they never need to be uploaded.
+seed/
 *.md
 !README.md
 .ruff_cache/

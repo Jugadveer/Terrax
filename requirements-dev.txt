@@ -1,0 +1,19 @@
+# Everything the deployed site needs, plus the tools it does not.
+#
+# A serverless host installs requirements.txt on every build and keeps the
+# result, so a test runner and a Solidity compiler shipped to production cost
+# storage on every deploy and are never imported once.
+-r requirements.txt
+
+pytest==9.0.2
+pytest-django==4.13.2
+ruff==0.15.4
+
+# Compiles chain/contracts into chain/artifacts. The artifacts are committed,
+# so a deployed site reads them and never needs the compiler.
+py-solc-x==2.0.5
+
+# An in-memory EVM, so the Solidity is executed by the test suite rather than
+# mocked.
+eth-tester==0.14.0b1
+py-evm==0.12.1b1

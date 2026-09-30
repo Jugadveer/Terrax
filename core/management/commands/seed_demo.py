@@ -512,13 +512,13 @@ class Command(BaseCommand):
 
     def _load_photo_pool(self) -> dict[str, list[Path]]:
         """Group the bundled photographs by the filename prefix."""
-        folder = Path(settings.BASE_DIR) / "static" / "img" / "seed"
+        folder = Path(settings.BASE_DIR) / "seed" / "photos"
         pool: dict[str, list[Path]] = {}
         for path in sorted(folder.glob("*.jpg")):
             pool.setdefault(path.stem.split("-")[0], []).append(path)
         if not pool:
             self.stdout.write(
-                self.style.WARNING("No photographs in static/img/seed; listings will have none.")
+                self.style.WARNING("No photographs in seed/photos; listings will have none.")
             )
         return pool
 
@@ -540,7 +540,7 @@ class Command(BaseCommand):
 
     def _photos(self, listing: Listing) -> None:
         """
-        Attach photographs from the local pool in `static/img/seed`.
+        Attach photographs from the local pool in `seed/photos`.
 
         Local files rather than remote URLs, so the marketplace never waits on
         a third party while a page renders, and the whole project seeds with no

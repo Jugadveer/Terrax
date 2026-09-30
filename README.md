@@ -21,7 +21,7 @@
 ```bash
 python -m venv .venv
 .venv/Scripts/activate          # source .venv/bin/activate on macOS and Linux
-pip install -r requirements.txt
+pip install -r requirements-dev.txt     # requirements.txt alone for a deploy
 python manage.py migrate
 python manage.py seed_demo
 python manage.py runserver
@@ -419,6 +419,7 @@ node never pays for loading one. Django's own start-up is around half a second.
 ## Tests
 
 ```bash
+pip install -r requirements-dev.txt
 pytest          # 176 tests
 ruff check .
 python manage.py check --deploy --settings=terrax.settings.prod
@@ -450,7 +451,7 @@ python manage.py sync_chain --dry-run    # what would be sent, sending nothing
 `publish`, valuations come from the comparables engine, offers go through the
 offer service, and a few holders sell part of their position so the ledger's
 secondary side is exercised rather than left dormant. Photographs come from a
-local pool in `static/img/seed`, so the seed runs with no network connection.
+local pool in `seed/photos`, so the seed runs with no network connection.
 
 Valuations are comparisons, so adding listings makes older estimates stale. That
 is why `seed_demo` finishes by calling `recompute`, and why a deployment would

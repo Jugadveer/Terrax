@@ -19,9 +19,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import solcx
-
 logger = logging.getLogger(__name__)
+
+# `solcx` is imported inside the two functions that compile, not at the top.
+# It takes about four tenths of a second to load and this module is reached
+# from every listing page, but a deployed site only ever reads the cached
+# artifact. A compiler is a build-time dependency, so it stays out of the
+# request path and out of the production requirements.
 
 SOLC_VERSION = "0.8.28"
 OPTIMIZER_RUNS = 200
@@ -64,6 +68,8 @@ def available() -> list[str]:
 
 def ensure_solc() -> str:
     """Install the pinned compiler if this machine does not have it yet."""
+    import solcx
+
     installed = {str(version) for version in solcx.get_installed_solc_versions()}
     if SOLC_VERSION not in installed:
         logger.info("installing solc %s", SOLC_VERSION)
@@ -88,6 +94,8 @@ def compile_contract(name: str, *, force: bool = False) -> Artifact:
         stored = json.loads(cached.read_text(encoding="utf-8"))
         if stored.get("source_hash") == digest:
             return Artifact(name, stored["abi"], stored["bytecode"], digest)
+
+    import solcx
 
     ensure_solc()
     compiled = solcx.compile_files(
