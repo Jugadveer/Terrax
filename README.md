@@ -364,9 +364,21 @@ configured away rather than assumed.
 
 ```
 api/index.py              the object Vercel imports: Django's own WSGI application
-vercel.json               the install step, the build step, and the single rewrite
+vercel.json               one build, one route
 terrax/settings/build.py  settings for collectstatic, which serves no request
+staticfiles/              committed, for the reason below
 .vercelignore             keeps the virtualenv, tests, docs and seed photos out
+```
+
+`staticfiles/` is committed rather than built on the host. Vercel offers two
+routing forms and only the `builds`/`routes` pair hands a WSGI handler the
+original request path; the newer `rewrites` replaces it, so Django sees
+`/api/index` for every URL and answers 404 to all of them. That form also
+ignores `buildCommand`, which leaves nowhere to run `collectstatic`. Committing
+the output is the smaller cost. Regenerate it with:
+
+```bash
+python manage.py collectstatic --noinput --settings=terrax.settings.build
 ```
 
 There is deliberately no `pyproject.toml`. Vercel's Python builder finds one,

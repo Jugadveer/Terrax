@@ -17,8 +17,10 @@ db.sqlite3
 db.sqlite3-journal
 /media/
 
-# Collected static output (built from /static)
-/staticfiles/
+# Collected static output is committed, not ignored. Vercel's `builds` form is
+# the one that passes the original request path to a WSGI handler, and it
+# ignores `buildCommand`, so there is nowhere left to run collectstatic. One
+# command regenerates it: see the deployment section of the README.
 
 # Editors and OS
 .DS_Store
