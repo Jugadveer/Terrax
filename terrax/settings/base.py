@@ -6,6 +6,7 @@ silently papered over by a development default. `manage.py` and `wsgi.py`
 point at `terrax.settings.dev` and `terrax.settings.prod` respectively.
 """
 
+import os
 from pathlib import Path
 
 from decouple import Csv, config
@@ -59,25 +60,63 @@ TEMPLATES = [
     },
 ]
 
-# SQLite locally, whatever `DATABASE_URL` names when it is set. A deployment on
-# a serverless platform has no writable disk, so the URL is how it gets a real
-# database without any other setting changing.
-DATABASE_URL = config("DATABASE_URL", default="")
+# SQLite locally, whatever the environment names when a real database exists.
+# A deployment on a serverless platform has no writable disk, so a URL is how
+# it gets one without any other setting changing.
+#
+# `DATABASE_URL` is the name this project documents. The rest of the list is
+# there because a hosting provider's database integration writes its own names,
+# and often writes them behind a prefix the person connecting it chose, so
+# `DATABASE_URL` is the one name that turns out not to exist. Rather than ask
+# for a variable to be duplicated by hand, the suffix is what gets matched.
+DATABASE_URL_NAMES = (
+    "DATABASE_URL",
+    "POSTGRES_URL",
+    "POSTGRES_URL_NON_POOLING",
+    "DATABASE_URL_UNPOOLED",
+)
+
+
+def _database_url() -> str:
+    for name in DATABASE_URL_NAMES:
+        found = config(name, default="")
+        if found:
+            return found
+    # A prefixed variable from an integration, e.g. `NEON_DATABASE_URL`.
+    for name, value in sorted(os.environ.items()):
+        if value and name.endswith(DATABASE_URL_NAMES):
+            return value
+    return ""
+
+
+DATABASE_URL = _database_url()
 
 if DATABASE_URL:
     import dj_database_url
 
-    # SSL is required of Postgres, which is what a managed database will be,
-    # and never of the others: SQLite's `connect()` has no `sslmode` argument
-    # and raises a TypeError if one arrives.
+    is_postgres = DATABASE_URL.startswith(("postgres://", "postgresql://"))
+
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=DATABASE_URL.startswith(("postgres://", "postgresql://")),
+            # SSL is required of Postgres, which is what a managed database
+            # will be, and never of the others: SQLite's `connect()` has no
+            # `sslmode` argument and raises a TypeError if one arrives.
+            ssl_require=is_postgres,
         )
     }
+
+    if is_postgres:
+        # A managed Postgres URL usually points at a connection pooler running
+        # in transaction mode, where a prepared statement outlives the
+        # transaction that made it and the next client to borrow the connection
+        # finds a name already taken. Both of these are no-ops against a direct
+        # connection and the difference between working and intermittently
+        # failing against a pooled one.
+        DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
+        DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 else:
     DATABASES = {
         "default": {
