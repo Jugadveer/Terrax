@@ -363,7 +363,7 @@ application are a writable disk and a process that stays alive, and both are
 configured away rather than assumed.
 
 ```
-api/index.py              the object Vercel imports: Django's own WSGI application
+terrax/wsgi.py            the object Vercel imports, and gunicorn would too
 vercel.json               one build, one route
 terrax/settings/build.py  settings for collectstatic, which serves no request
 staticfiles/              committed, for the reason below
@@ -372,10 +372,12 @@ staticfiles/              committed, for the reason below
 
 `staticfiles/` is committed rather than built on the host. Vercel offers two
 routing forms and only the `builds`/`routes` pair hands a WSGI handler the
-original request path; the newer `rewrites` replaces it, so Django sees
-`/api/index` for every URL and answers 404 to all of them. That form also
-ignores `buildCommand`, which leaves nowhere to run `collectstatic`. Committing
-the output is the smaller cost. Regenerate it with:
+original request path. The newer `rewrites` form replaces it, so Django sees
+the destination for every URL and answers 404 to all of them; a handler under
+`api/` has the same problem, which is why the entry point is `terrax/wsgi.py`
+rather than something Vercel treats as a route. `builds` also ignores
+`buildCommand`, which leaves nowhere to run `collectstatic`, so committing the
+output is the smaller cost. Regenerate it with:
 
 ```bash
 python manage.py collectstatic --noinput --settings=terrax.settings.build
@@ -412,8 +414,7 @@ Set these in the Vercel project, then push:
 own hostname, which changes on every preview build and so cannot be a literal.
 
 A missing variable does not produce a blank `FUNCTION_INVOCATION_FAILED`.
-`api/index.py` catches `ImproperlyConfigured` and answers 503 with a page that
-names what is missing, because the alternative is a crash whose reason is
+`terrax/wsgi.py` catches it and answers 503 with a page that names what failed, because the alternative is a crash whose reason is
 buried in a log nobody has open.
 
 Then, once, from a machine that can reach the database:
