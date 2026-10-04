@@ -417,7 +417,12 @@ A missing variable does not produce a blank `FUNCTION_INVOCATION_FAILED`.
 `terrax/wsgi.py` catches it and answers 503 with a page that names what failed, because the alternative is a crash whose reason is
 buried in a log nobody has open.
 
-Then, once, from a machine that can reach the database:
+Then, once, from a machine that can reach the database. Both flags matter:
+`--settings=terrax.settings.prod` because development settings pin file storage
+to the local disk and ignore `CLOUDINARY_URL` entirely, and `CLOUDINARY_URL`
+itself because otherwise the photographs land on the seeding machine and the
+deployed site serves rows pointing at files it has never seen. `seed_demo`
+refuses that combination rather than spending five minutes producing it.
 
 ```bash
 DATABASE_URL=... python manage.py migrate --settings=terrax.settings.prod

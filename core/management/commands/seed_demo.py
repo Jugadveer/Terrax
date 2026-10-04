@@ -19,8 +19,9 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
 from django.core.management import call_command
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
@@ -186,8 +187,15 @@ class Command(BaseCommand):
         parser.add_argument(
             "--reset", action="store_true", help="Delete existing demo data first."
         )
+        parser.add_argument(
+            "--allow-local-media",
+            action="store_true",
+            help="Permit photographs on local disk while seeding a remote database.",
+        )
 
     def handle(self, *args, **options):
+        self._check_media_destination(allow_local=options["allow_local_media"])
+
         random.seed(20260917)
         self._pool = self._load_photo_pool()
         self._cursor: dict[str, int] = {}
@@ -509,6 +517,34 @@ class Command(BaseCommand):
         admin.profile.save()
 
     # -- content ----------------------------------------------------------
+
+    def _check_media_destination(self, *, allow_local: bool) -> None:
+        """
+        Refuse to write photographs somewhere the database cannot reach.
+
+        Seeding a remote database while media goes to the local filesystem
+        produces rows that point at files only this machine has. Nothing fails,
+        the upload takes minutes, and the result is a site full of broken
+        images. The combination is always a mistake, so it is an error rather
+        than a warning.
+
+        The usual cause is a missing `--settings=terrax.settings.prod`:
+        development settings pin storage to the filesystem, so a configured
+        `CLOUDINARY_URL` is ignored.
+        """
+        from django.core.files.storage import default_storage
+
+        remote_database = "sqlite" not in settings.DATABASES["default"]["ENGINE"]
+        local_media = isinstance(default_storage, FileSystemStorage)
+
+        if remote_database and local_media and not allow_local:
+            raise CommandError(
+                "This would seed a remote database with photographs written to "
+                "this machine's disk, which the deployed site cannot read. "
+                "Set CLOUDINARY_URL and pass --settings=terrax.settings.prod, "
+                "or re-run with --allow-local-media if that is really what you "
+                "want."
+            )
 
     def _load_photo_pool(self) -> dict[str, list[Path]]:
         """Group the bundled photographs by the filename prefix."""
