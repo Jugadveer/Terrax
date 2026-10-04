@@ -10,6 +10,8 @@ than assumed: the database comes from `DATABASE_URL`, and uploads go to object
 storage when it is configured.
 """
 
+import os
+
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 
@@ -57,6 +59,12 @@ CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host != "
 CLOUDINARY_URL = config("CLOUDINARY_URL", default="")
 
 if CLOUDINARY_URL:
+    # The cloudinary library reads this from `os.environ` itself rather than
+    # from Django settings. A deployed host sets it there already; a local run
+    # gets it from `.env`, which python-decouple reads without exporting, so it
+    # has to be put back for the library to find it.
+    os.environ.setdefault("CLOUDINARY_URL", CLOUDINARY_URL)
+
     INSTALLED_APPS = [*INSTALLED_APPS, "cloudinary", "cloudinary_storage"]  # noqa: F405
     STORAGES = {
         **STORAGES,  # noqa: F405

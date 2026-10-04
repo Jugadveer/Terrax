@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import uuid
 from decimal import Decimal
 from io import BytesIO
@@ -17,6 +18,8 @@ from django.utils.text import slugify
 from PIL import Image, ImageOps
 
 from properties import constants as C
+
+logger = logging.getLogger(__name__)
 
 THUMBNAIL_SIZE = (640, 420)
 
@@ -342,12 +345,34 @@ class ListingImage(models.Model):
         return self.thumbnail.url if self.thumbnail else self.image.url
 
 
+def document_storage():
+    """
+    Where compliance documents go, which is not where photographs go.
+
+    Cloudinary sorts uploads into image, video and raw, and refuses to deliver
+    a PDF stored as an image: the upload succeeds and every later read comes
+    back 401. Documents here are PDFs and scans, so they belong in raw.
+
+    A callable rather than an instance, so the choice is made when the field is
+    used rather than when this module is imported, and so a local run with no
+    Cloudinary configured keeps using the filesystem.
+    """
+    from django.conf import settings
+    from django.core.files.storage import default_storage
+
+    if "cloudinary_storage" in settings.INSTALLED_APPS:
+        from cloudinary_storage.storage import RawMediaCloudinaryStorage
+
+        return RawMediaCloudinaryStorage()
+    return default_storage
+
+
 class ListingDocument(models.Model):
     listing = models.ForeignKey(
         Listing, on_delete=models.CASCADE, related_name="documents"
     )
     kind = models.CharField(max_length=20, choices=C.DocumentKind.choices)
-    file = models.FileField(upload_to="listings/documents/")
+    file = models.FileField(upload_to="listings/documents/", storage=document_storage)
     original_name = models.CharField(max_length=180, blank=True)
     size_bytes = models.PositiveIntegerField(default=0)
     checksum = models.CharField(
@@ -373,16 +398,35 @@ class ListingDocument(models.Model):
     def save(self, *args, **kwargs) -> None:
         if self.file and not self.checksum:
             self.original_name = self.original_name or self.file.name.rsplit("/", 1)[-1]
-            self.size_bytes = getattr(self.file, "size", 0) or 0
+            self.size_bytes = self._size()
             self.checksum = self._hash_file()
         super().save(*args, **kwargs)
 
+    def _size(self) -> int:
+        try:
+            return self.file.size or 0
+        except Exception:  # noqa: BLE001 - see _hash_file
+            return 0
+
     def _hash_file(self) -> str:
+        """
+        SHA-256 of the stored bytes, or empty when they cannot be read.
+
+        Reading touches the storage backend, which may be a remote service that
+        is slow, unreachable, or refusing to serve this file back. None of that
+        should stop a row being saved: the checksum drives duplicate detection,
+        its absence is already handled where it is used, and the document checks
+        report an unreadable file as a failed check rather than an exception.
+        """
         digest = hashlib.sha256()
-        self.file.seek(0)
-        for chunk in self.file.chunks():
-            digest.update(chunk)
-        self.file.seek(0)
+        try:
+            self.file.seek(0)
+            for chunk in self.file.chunks():
+                digest.update(chunk)
+            self.file.seek(0)
+        except Exception:  # noqa: BLE001 - an unreadable file is a fact, not a crash
+            logger.warning("could not read %s to checksum it", self.file.name)
+            return ""
         return digest.hexdigest()
 
     @property
